@@ -1,4 +1,5 @@
 import { META_DESCRIPTION, META_TITLE, SKIP_LABEL } from '@/consts/label';
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { Footer } from '@/components/Footer/Footer';
@@ -25,6 +26,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <Header />
         <main id="content">{children}</main>
         <Footer />
+        {process.env.NODE_ENV === 'production' ? <Analytics /> : null}
       </body>
     </html>
   );

@@ -73,7 +73,7 @@ export function SearchPanel() {
           <section className="text-center pt-6 flex max-md:flex-col justify-center gap-6">
             <div>
               <Button
-                href="#"
+                href="#content"
                 icon="arrow-up-square"
                 variant="secondary"
               >
