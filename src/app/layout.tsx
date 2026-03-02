@@ -7,8 +7,27 @@ import { Header } from '@/components/Header/Header';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  title: META_TITLE,
+  metadataBase: new URL('https://coffee-search.vercel.app'),
+  title: {
+    default: META_TITLE,
+    template: '%s | ' + META_TITLE,
+  },
   description: META_DESCRIPTION,
+  openGraph: {
+    title: META_TITLE,
+    description: META_DESCRIPTION,
+    url: 'https://coffee-search.vercel.app',
+    siteName: META_TITLE,
+    locale: 'en_GB',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

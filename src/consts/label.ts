@@ -1,7 +1,7 @@
 export const FOOTER_NOTE = 'Built with love. All rights reserved';
 export const FOOTER_LINK_LABEL = 'Source code';
 export const GITHUB_LINK_LABEL = 'View project on GitHub';
-export const SITE_LOGO = 'COFFEE {icon} FINDER';
+export const SITE_LOGO = 'COFFEE {icon} SEARCH';
 export const CLOSE = 'Close';
 export const ORIGIN = 'Origin';
 export const PACKSHOT_ALT = 'Pack shot of the {name} product';
@@ -21,5 +21,5 @@ export const BACK_TO_RESULTS = 'Back to results';
 export const GITHUB_URL = 'https://github.com/mmmoustache/coffee-search';
 export const SKIP_LABEL = 'Skip to content';
 export const VIEW_PRODUCT = 'View product';
-export const META_TITLE = 'Coffee Finder';
+export const META_TITLE = 'Coffee Search';
 export const META_DESCRIPTION = 'An ai-powered app to recommend coffee styles';

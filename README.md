@@ -1,6 +1,6 @@
-# Coffee Finder
+# Coffee Search
 
-Coffee Finder is a sample Next.js + TypeScript application that demonstrates how to fetch product recommendations from a natural language query using embeddings and an LLM.
+Coffee Search is a sample Next.js + TypeScript application that demonstrates how to fetch product recommendations from a natural language query using embeddings and an LLM.
 
 ## Requirements
 
