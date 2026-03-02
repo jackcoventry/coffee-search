@@ -202,7 +202,7 @@ describe('SearchPanel', () => {
     render(<SearchPanel />);
 
     const link = screen.getByRole('link', { name: 'Back to top' });
-    expect(link).toHaveAttribute('href', '#');
+    expect(link).toHaveAttribute('href', '#content');
   });
 
   it('calls window.scrollTo(0,0) when showResults changes', () => {
