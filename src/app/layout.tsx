@@ -20,9 +20,11 @@ export const metadata: Metadata = {
     siteName: META_TITLE,
     locale: 'en_GB',
     type: 'website',
+    images: [{ url: '/og-default.webp', width: 1200, height: 630, alt: 'Coffee Search' }],
   },
   twitter: {
     card: 'summary_large_image',
+    images: ['/og-default.webp'],
   },
   robots: {
     index: true,

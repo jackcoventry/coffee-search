@@ -11,24 +11,22 @@ export async function generateMetadata({ params }: { params: { sku: string } }):
   const product = await getProductBySku(params.sku);
 
   if (!product) {
-    return {
-      title: 'Product Not Found',
-    };
+    return { title: 'Product Not Found' };
   }
+
+  const description = product.description ?? undefined;
 
   return {
     title: product.name,
-    description: product.description,
+    description,
+    alternates: {
+      canonical: `/product/${product.sku}`,
+    },
     openGraph: {
       title: product.name,
-      description: product.description,
-      type: 'product',
+      description,
+      type: 'website',
       url: `/product/${product.sku}`,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: product.name,
-      description: product.description,
     },
   };
 }
@@ -36,11 +34,11 @@ export async function generateMetadata({ params }: { params: { sku: string } }):
 export default async function ProductPage({
   params,
   searchParams,
-}: {
+}: Readonly<{
   params: Promise<{ sku: string }>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   searchParams: any;
-}) {
+}>) {
   const { sku } = await params;
   const from = (await searchParams)?.from ?? '/';
   const product = await getProductBySku(sku);
@@ -48,8 +46,31 @@ export default async function ProductPage({
 
   if (!product) notFound();
 
+  const url = `https://coffee-search.vercel.app/product/${product.sku}`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description ?? undefined,
+    sku: product.sku,
+    category: product.category ?? undefined,
+    weight: product.weight_g
+      ? { '@type': 'QuantitativeValue', value: product.weight_g, unitCode: 'GRM' }
+      : undefined,
+    brand: { '@type': 'Brand', name: 'Coffee Search' },
+    url,
+  };
+
+  const cleanJsonLd = structuredClone(jsonLd);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // This is safe because we're serializing our own data, not user input
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(cleanJsonLd) }}
+      />
       <Product {...product}>
         <div className="text-center pt-6 lg:flex gap-6">
           <div className="max-lg:mb-6">
