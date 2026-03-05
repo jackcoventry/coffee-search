@@ -1,6 +1,3 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 # Standard "CI-ish" gate
 npm run ci:local
 npm run bundle:budget

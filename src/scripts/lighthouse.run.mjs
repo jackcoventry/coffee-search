@@ -2,7 +2,6 @@ import { execSync } from 'node:child_process';
 
 const baseRef = process.env.LHCI_BASE_REF ?? 'origin/main';
 
-// Grab changed files compared to base. If base ref doesn't exist locally, fall back to last commit.
 function getChangedFiles() {
   try {
     const out = execSync(`git diff --name-only ${baseRef}...HEAD`, { encoding: 'utf8' }).trim();
@@ -13,9 +12,8 @@ function getChangedFiles() {
   }
 }
 
-// Adjust these to match your repo layout
 const RELEVANT_PATTERNS = [
-  /^src\//, // if your Next code lives here
+  /^src\//,
   /^public\//,
   /^next\.config\.(js|mjs|ts)$/,
   /^middleware\.(js|ts)$/,
