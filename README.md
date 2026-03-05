@@ -25,7 +25,7 @@ Create a `.env` or `.env.local` file in the project root with the variables belo
 1. Clone the repository
 
 ```
-  git clone https://github.com/mmmoustache/coffee-search.git
+  git clone https://github.com/jackcoventry/coffee-search.git
   cd ai-search
 ```
 
@@ -127,4 +127,4 @@ If you'd like to contribute, open an issue or PR. Keep changes focused and add t
 ## License
 
 Licensed under MIT License
-Copyright (c) 2026 github.com/mmmoustache
+Copyright (c) 2026 github.com/jackcoventry
