@@ -7,6 +7,7 @@ import { assertStrictApi } from '@/lib/apiGuard';
 import { getCache, setCache } from '@/lib/cacheResult';
 import { pool } from '@/lib/db';
 import { embedText } from '@/lib/embeddings';
+import { getOptionalNumberEnv } from '@/lib/env';
 import { guardUserInput } from '@/lib/guard';
 import { openai } from '@/lib/openai';
 import { rateLimitOrThrow } from '@/lib/rateLimit';
@@ -53,7 +54,16 @@ export async function POST(req: Request) {
     const cached = await getCache<z.infer<typeof RecommendResponseSchema>>(cacheKey);
 
     // If result already exists in cache, return the cache instead
-    if (cached) return NextResponse.json({ ...cached, cached: true });
+    if (cached) {
+      console.info('api_request', {
+        cached: true,
+        durationMs: Date.now() - startedAt,
+        method: req.method,
+        route: '/api/recommend',
+        status: 200,
+      });
+      return NextResponse.json({ ...cached, cached: true });
+    }
 
     const embedding = await embedText(query);
     const embeddingSql = toSql(embedding);
@@ -76,10 +86,19 @@ export async function POST(req: Request) {
     if (results.length === 0) {
       const emptyPayload = createNoCandidateResponse(query);
       await setCache(cacheKey, emptyPayload, 60_000);
+      console.info('api_request', {
+        cached: false,
+        candidateCount: 0,
+        durationMs: Date.now() - startedAt,
+        method: req.method,
+        resultCount: 0,
+        route: '/api/recommend',
+        status: 200,
+      });
       return NextResponse.json({ ...emptyPayload, cached: false });
     }
 
-    const resp = await withTimeout(Number(process.env.OPENAI_TIMEOUT_MS ?? 12_000), (signal) =>
+    const resp = await withTimeout(getOptionalNumberEnv('OPENAI_TIMEOUT_MS', 12_000), (signal) =>
       openai.responses.create(
         {
           model: process.env.LLM_MODEL || 'gpt-4.1-mini',
@@ -115,6 +134,16 @@ export async function POST(req: Request) {
     }
 
     await setCache(cacheKey, validatedPayload, 5 * 60_000);
+
+    console.info('api_request', {
+      cached: false,
+      candidateCount: results.length,
+      durationMs: Date.now() - startedAt,
+      method: req.method,
+      resultCount: validatedPayload.results.length,
+      route: '/api/recommend',
+      status: 200,
+    });
 
     return NextResponse.json({ ...validatedPayload, cached: false });
   } catch (err) {

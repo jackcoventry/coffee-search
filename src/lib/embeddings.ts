@@ -1,8 +1,9 @@
 import { openai } from '@/lib/openai';
+import { getOptionalNumberEnv } from '@/lib/env';
 import { withTimeout } from '@/lib/timeout';
 
 export async function embedText(input: string): Promise<number[]> {
-  const res = await withTimeout(Number(process.env.OPENAI_TIMEOUT_MS ?? 12_000), (signal) =>
+  const res = await withTimeout(getOptionalNumberEnv('OPENAI_TIMEOUT_MS', 12_000), (signal) =>
     openai.embeddings.create(
       {
         model: process.env.EMBED_MODEL || 'text-embedding-3-small',

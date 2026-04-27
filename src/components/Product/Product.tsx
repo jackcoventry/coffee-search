@@ -56,30 +56,21 @@ export function Product({
       className={`product | motion-safe:animate-fade-translate-in motion-safe:opacity-0 ${theme?.backgroundColor} mx-3 lg:mx-5 border-white`}
     >
       <div className="grid p-4 lg:p-12 gap-30 xl:grid-cols-(--product-grid-cols)">
-        <div className="hidden xl:block">
+        <div className="contents">
           <Image
             src="/pack.webp"
             alt={packShotAlt}
-            className="product__image"
+            className="product__image max-xl:order-2 max-xl:mb-8 max-xl:mx-auto max-xl:max-w-2xs xl:w-155 xl:h-155"
             height={620}
             width={620}
             priority
+            sizes="(min-width: 1280px) 620px, 300px"
           />
         </div>
         <div className="flex flex-col gap-6">
           {category && <p className="font-body uppercase text-right">{category}</p>}
           <h1 className="font-heading">{name}</h1>
           {description && <p className="font-body">{description}</p>}
-
-          <div className="block xl:hidden mb-8 max-w-2xs mx-auto">
-            <Image
-              src="/pack.webp"
-              alt={packShotAlt}
-              className="product__image"
-              height={300}
-              width={300}
-            />
-          </div>
 
           <ul className="grid grid-flow-col border border-white">
             {descriptors?.map((descriptor) => (
