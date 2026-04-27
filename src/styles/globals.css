@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import './fonts.css';
 
+/** TAILWIND TOKENS **/
+
 @theme {
   /* Colors mapped to SKU's  */
   --color-100001: #f7b7c2;
@@ -20,10 +22,14 @@
   --animate-fade-translate-in: fadeTranslateIn 1s ease-in-out forwards;
 }
 
+/** SHARED LAYOUT VARIABLES **/
+
 :root {
   --shell-height: calc(100dvh - 250px);
   --nav-row: 20px 1fr 20px;
 }
+
+/** FONTS **/
 
 @utility font-mega {
   font-family: 'Special Gothic Expanded One', sans-serif;
@@ -52,6 +58,8 @@
   font-size: 14px;
 }
 
+/** GENERAL **/
+
 .focusable:focus-visible {
   outline-width: 3px;
   outline-style: solid;
@@ -61,6 +69,8 @@
 .focusable:not([data-valid='false']):focus-visible {
   outline-color: yellow;
 }
+
+/** ANIMATIONS **/
 
 @keyframes fadeIn {
   0% {

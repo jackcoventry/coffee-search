@@ -71,7 +71,6 @@ Important dependencies used in this project (see `package.json` for full list an
 - `tailwindcss` — styling utility
 - `zod` — runtime schema validation
 - `react-hook-form` and `@hookform/resolvers` — form handling
-- `csv-parse` — CSV parsing for import scripts
 - `vitest`, `@testing-library/*`, `jsdom` — testing utilities
 
 Dev tooling includes `eslint`, `typescript`, `tsx` for scripts, and SVG tooling for icon generation.
