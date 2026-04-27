@@ -20,6 +20,7 @@ describe('getProducts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
+    vi.doMock('@/consts/flags', () => ({ USE_MOCK_PRODUCTS: false }));
   });
 
   it('getAllProducts: wrapped with unstable_cache and returns rows', async () => {
@@ -73,5 +74,22 @@ describe('getProducts', () => {
 
     expect(queryMock).toHaveBeenCalledTimes(2);
     expect(res).toEqual([{ sku: 'F1' }, { sku: 'F2' }]);
+  });
+
+  it('uses mock products without querying Postgres when enabled', async () => {
+    vi.resetModules();
+    vi.doMock('@/consts/flags', () => ({ USE_MOCK_PRODUCTS: true }));
+
+    const mod = await import('@/lib/getProducts');
+
+    await expect(mod.getProductBySku('100001')).resolves.toEqual(
+      expect.objectContaining({ name: 'Golden Lagoon', sku: '100001' })
+    );
+    await expect(mod.getAllProducts(2, 0)).resolves.toHaveLength(2);
+    await expect(mod.getSimilarProductsBySku('100001', 2)).resolves.toEqual([
+      expect.objectContaining({ sku: '100010' }),
+      expect.objectContaining({ sku: '100006' }),
+    ]);
+    expect(queryMock).not.toHaveBeenCalled();
   });
 });

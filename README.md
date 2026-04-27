@@ -14,6 +14,7 @@ Coffee Search is a sample Next.js + TypeScript application that demonstrates how
 Create a `.env` or `.env.local` file in the project root with the variables below. Example values and types are shown:
 
 - `NEXT_PUBLIC_USE_MOCK_RECOMMEND` (boolean) — set to `true` to use built-in mock data instead of calling the API.
+- `USE_MOCK_PRODUCTS` (boolean, optional) — set to `true` to use the built-in mock product catalogue for local/e2e runs instead of Postgres.
 - `LLM_MODEL` (string) — the LLM model id to use for natural language queries (e.g. `gpt-4o`, or your chosen model).
 - `EMBED_MODEL` (string) — the embedding model id used to create vector embeddings.
 - `DATABASE_URL` (string) — Postgres connection string for storing products and vectors.

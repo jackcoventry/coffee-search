@@ -1,9 +1,15 @@
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { Product } from '@/types/product';
+import { USE_MOCK_PRODUCTS } from '@/consts/flags';
 import { pool } from '@/lib/db';
+import { mockProducts } from '@/mocks/products';
 
 export const getProductBySku = cache(async (sku: string): Promise<Product | null> => {
+  if (USE_MOCK_PRODUCTS) {
+    return mockProducts.find((product) => String(product.sku) === sku) ?? null;
+  }
+
   const { rows } = await pool.query<Product>(
     `
     SELECT id, sku, name, weight_g, category,
@@ -23,6 +29,10 @@ export const getProductBySku = cache(async (sku: string): Promise<Product | null
 
 export const getAllProducts = unstable_cache(
   async (limit: number, offset: number) => {
+    if (USE_MOCK_PRODUCTS) {
+      return mockProducts.slice(offset, offset + limit);
+    }
+
     const { rows } = await pool.query(
       `
       SELECT id, sku, name, weight_g, category,
@@ -44,6 +54,10 @@ export const getAllProducts = unstable_cache(
 );
 
 export const getSimilarProductsBySku = cache(async (sku: string, limit = 6): Promise<Product[]> => {
+  if (USE_MOCK_PRODUCTS) {
+    return mockProducts.filter((product) => String(product.sku) !== sku).slice(0, limit);
+  }
+
   const { rows } = await pool.query<Product>(
     `
     WITH target AS (
