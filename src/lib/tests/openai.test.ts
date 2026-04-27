@@ -24,12 +24,8 @@ describe('openai client config', () => {
     });
   });
 
-  it('passes undefined apiKey when env var is missing', async () => {
-    await import('@/lib/openai');
-
-    expect(OpenAIMock).toHaveBeenCalledTimes(1);
-    expect(OpenAIMock).toHaveBeenCalledWith({
-      apiKey: undefined,
-    });
+  it('throws when OPENAI_API_KEY is missing', async () => {
+    await expect(import('@/lib/openai')).rejects.toThrow(/OPENAI_API_KEY/);
+    expect(OpenAIMock).not.toHaveBeenCalled();
   });
 });

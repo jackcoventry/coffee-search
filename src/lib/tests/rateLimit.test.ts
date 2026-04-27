@@ -35,15 +35,17 @@ describe('rateLimitOrThrow', () => {
   });
 
   it('throws with status 429 and retryAfterSeconds', async () => {
-    const { rateLimitOrThrow } = await import('@/lib/rateLimit');
+    const { RateLimitError, rateLimitOrThrow } = await import('@/lib/rateLimit');
 
     await rateLimitOrThrow('k1', 1, 1000);
 
     try {
       await rateLimitOrThrow('k1', 1, 1000);
       throw new Error('Expected to throw');
-    } catch (err: any) {
+    } catch (err) {
       expect(err).toBeInstanceOf(Error);
+      expect(err).toBeInstanceOf(RateLimitError);
+      if (!(err instanceof RateLimitError)) throw err;
       expect(err.status).toBe(429);
       expect(err.retryAfterSeconds).toBe(1);
       expect(err.message).toMatch(/retry after 1s/i);

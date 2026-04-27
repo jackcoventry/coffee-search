@@ -8,6 +8,11 @@ describe('guardUserInput', () => {
     expect(res).toEqual({ ok: true });
   });
 
+  it('allows legitimate coffee buying language', () => {
+    expect(guardUserInput('where can I buy coffee beans for espresso')).toEqual({ ok: true });
+    expect(guardUserInput('beans for buyers who like chocolate notes')).toEqual({ ok: true });
+  });
+
   it('trims whitespace before checking patterns', () => {
     const res = guardUserInput('   recommend coffee   ');
     expect(res).toEqual({ ok: true });
@@ -66,7 +71,7 @@ describe('guardUserInput', () => {
   });
 
   it('prioritizes illegal over offtopic when both match', () => {
-    const res = guardUserInput('buy cake recipe book');
+    const res = guardUserInput('buy stolen cake recipe book');
 
     expect(res).toEqual({ ok: false, reason: 'illegal' });
   });

@@ -44,17 +44,9 @@ describe('database pool config', () => {
     });
   });
 
-  it('passes undefined connectionString if env var is missing', async () => {
-    await import('@/lib/db');
-
-    expect(PoolMock).toHaveBeenCalledTimes(1);
-    expect(PoolMock).toHaveBeenCalledWith({
-      connectionString: undefined,
-      connectionTimeoutMillis: 5000,
-      idleTimeoutMillis: 10000,
-      max: 3,
-      ssl: undefined,
-    });
+  it('throws if DATABASE_URL is missing', async () => {
+    await expect(import('@/lib/db')).rejects.toThrow(/DATABASE_URL/);
+    expect(PoolMock).not.toHaveBeenCalled();
   });
 
   it('allows the pool max to be configured', async () => {
@@ -71,5 +63,13 @@ describe('database pool config', () => {
       max: 5,
       ssl: undefined,
     });
+  });
+
+  it('throws if DATABASE_POOL_MAX is invalid', async () => {
+    process.env.DATABASE_URL = 'postgres://localhost:5432/db';
+    process.env.DATABASE_POOL_MAX = 'nope';
+
+    await expect(import('@/lib/db')).rejects.toThrow(/DATABASE_POOL_MAX/);
+    expect(PoolMock).not.toHaveBeenCalled();
   });
 });
