@@ -1,6 +1,7 @@
 import { ORIGIN, VIEW_PRODUCT } from '@/consts/label';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
+import { getProductHref, getResultsReturnPath } from '@/lib/productLinks';
 import { getTheme } from '@/utils/getTheme';
 import { Recommendation } from '@/types/recommend';
 import { Button } from '@/components/Button/Button';
@@ -16,9 +17,9 @@ export function ResultTile({ result }: Readonly<Props>) {
   if (!result) return null;
 
   const query = params.get('query') ?? '';
-  const from = `/` + (query ? `?query=${encodeURIComponent(query)}#results` : '');
+  const from = getResultsReturnPath(query);
   const theme = getTheme(result?.sku || '');
-  const href = `/product/${result.sku}?from=${encodeURIComponent(from)}`;
+  const href = getProductHref(result.sku, from);
 
   return (
     <div className="result-tile | lg:grid">

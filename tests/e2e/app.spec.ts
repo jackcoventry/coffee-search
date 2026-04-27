@@ -36,6 +36,7 @@ test.describe('homepage', () => {
     test.skip(isMobile, 'Mobile browsers do not expose hardware Tab focus consistently.');
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('body').focus();
 
     await page.keyboard.press('Tab');
     await expect(page.getByRole('link', { name: /skip to content/i })).toBeFocused();

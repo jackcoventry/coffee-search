@@ -26,6 +26,8 @@ const Body = z.object({
 });
 
 export async function POST(req: Request) {
+  const startedAt = Date.now();
+
   try {
     assertStrictApi(req);
 
@@ -33,7 +35,13 @@ export async function POST(req: Request) {
     // Throw error if rate limit exceeds per IP.
     await rateLimitOrThrow(`recommend:${ip}`, 10, 60_000);
 
-    const { query } = Body.parse(await req.json());
+    const json = await req.json().catch(() => null);
+    const body = Body.safeParse(json);
+    if (!body.success) {
+      return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
+    }
+
+    const { query } = body.data;
     const g = guardUserInput(query); // Security gate for user queries!
     if (!g.ok) {
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
@@ -94,9 +102,15 @@ export async function POST(req: Request) {
     );
 
     const payload = safeJson(resp.output_text);
-    const validatedPayload = canonicalizeRecommendationResponse(payload, results, query);
+    const validatedPayload = (() => {
+      try {
+        return canonicalizeRecommendationResponse(payload, results, query);
+      } catch {
+        return null;
+      }
+    })();
 
-    if (validatedPayload.results.length === 0) {
+    if (!validatedPayload || validatedPayload.results.length === 0) {
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 502 });
     }
 
@@ -104,6 +118,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ...validatedPayload, cached: false });
   } catch (err) {
-    return apiErrorResponse(err);
+    return apiErrorResponse(err, 500, {
+      durationMs: Date.now() - startedAt,
+      method: req.method,
+      route: '/api/recommend',
+    });
   }
 }

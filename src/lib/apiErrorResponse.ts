@@ -6,6 +6,12 @@ type ApiErrorLike = {
   status?: unknown;
 };
 
+type ApiErrorContext = {
+  durationMs?: number;
+  method?: string;
+  route?: string;
+};
+
 function getStatus(err: unknown, fallbackStatus: number) {
   const status = (err as ApiErrorLike)?.status;
   return typeof status === 'number' && status >= 400 && status < 600 ? status : fallbackStatus;
@@ -16,13 +22,24 @@ function getRetryAfterSeconds(err: unknown) {
   return typeof retryAfterSeconds === 'number' ? retryAfterSeconds : null;
 }
 
-export function apiErrorResponse(err: unknown, fallbackStatus = 500) {
+function getErrorMessage(err: unknown) {
+  return err instanceof Error ? err.message : String(err);
+}
+
+export function apiErrorResponse(err: unknown, fallbackStatus = 500, context: ApiErrorContext = {}) {
   const isTimeout = isAbortLikeError(err);
   const status = isTimeout ? 504 : getStatus(err, fallbackStatus);
 
-  if (status >= 500) {
-    console.error(err);
-  }
+  const logPayload = {
+    durationMs: context.durationMs,
+    error: getErrorMessage(err),
+    method: context.method,
+    route: context.route,
+    status,
+  };
+
+  if (status >= 500) console.error('api_error', logPayload);
+  else console.warn('api_error', logPayload);
 
   const res = NextResponse.json(
     { error: isTimeout ? REQUEST_TIMEOUT_MESSAGE : 'Request could not be processed.' },

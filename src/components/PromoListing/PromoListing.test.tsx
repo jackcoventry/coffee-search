@@ -52,8 +52,8 @@ describe('PromoListing', () => {
     const tiles = screen.getAllByTestId('promo-tile');
     expect(tiles).toHaveLength(2);
 
-    expect(tiles[0]).toHaveAttribute('href', '/product/100001?from=');
-    expect(tiles[1]).toHaveAttribute('href', '/product/100002?from=');
+    expect(tiles[0]).toHaveAttribute('href', '/product/100001?from=%2F');
+    expect(tiles[1]).toHaveAttribute('href', '/product/100002?from=%2F');
 
     expect(promoTileSpy).toHaveBeenCalledTimes(2);
     expect(promoTileSpy.mock.calls[0][0].product).toMatchObject({ sku: '100001' });
@@ -61,18 +61,18 @@ describe('PromoListing', () => {
   });
 
   it('uses the "from" query param when building href', () => {
-    mockFromParam = 'homepage';
+    mockFromParam = '/';
 
     const products = [{ sku: 'ABC-123' }] as any;
 
     render(<PromoListing products={products} />);
 
     const tile = screen.getByTestId('promo-tile');
-    expect(tile).toHaveAttribute('href', '/product/ABC-123?from=homepage');
+    expect(tile).toHaveAttribute('href', '/product/ABC-123?from=%2F');
   });
 
-  it('encodes special characters in the "from" param', () => {
-    mockFromParam = 'email campaign/Feb?x=1&y=2';
+  it('encodes same-origin paths in the "from" param', () => {
+    mockFromParam = '/?query=email campaign/Feb?x=1&y=2#results';
 
     const products = [{ sku: 'SKU1' }] as any;
 
@@ -82,7 +82,7 @@ describe('PromoListing', () => {
 
     expect(tile).toHaveAttribute(
       'href',
-      '/product/SKU1?from=email%20campaign%2FFeb%3Fx%3D1%26y%3D2'
+      '/product/SKU1?from=%2F%3Fquery%3Demail%20campaign%2FFeb%3Fx%3D1%26y%3D2%23results'
     );
   });
 
