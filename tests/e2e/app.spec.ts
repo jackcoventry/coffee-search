@@ -72,9 +72,14 @@ test.describe('homepage', () => {
     await page.getByRole('button', { name: /find my coffee/i }).click();
 
     await expect(page.getByRole('heading', { name: /our recommendations/i })).toBeVisible();
-    await page.getByRole('link', { name: /view product/i }).first().click();
+    const firstProductLink = page.getByRole('link', { name: /view product/i }).first();
 
-    await expect(page).toHaveURL(/\/product\/100001/);
+    await expect(firstProductLink).toHaveAttribute('href', /\/product\/100001/);
+    await firstProductLink.scrollIntoViewIfNeeded();
+    await Promise.all([
+      page.waitForURL(/\/product\/100001/, { timeout: 10_000 }),
+      firstProductLink.click(),
+    ]);
     await expect(page.getByRole('heading', { level: 1, name: /golden lagoon/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /back to results/i })).toBeVisible();
   });
