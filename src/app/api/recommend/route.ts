@@ -11,6 +11,7 @@ import { guardUserInput } from '@/lib/guard';
 import { openai } from '@/lib/openai';
 import { rateLimitOrThrow } from '@/lib/rateLimit';
 import { safeJson } from '@/lib/safeJson';
+import { withTimeout } from '@/lib/timeout';
 
 z.config({ jitless: true });
 
@@ -73,15 +74,17 @@ export async function POST(req: Request) {
       [embeddingSql]
     );
 
-    const resp = await openai.responses.create({
-      model: process.env.LLM_MODEL || 'gpt-4.1-mini',
-      text: {
-        format: { type: 'json_object' },
-      },
-      input: [
+    const resp = await withTimeout(Number(process.env.OPENAI_TIMEOUT_MS ?? 12_000), (signal) =>
+      openai.responses.create(
         {
-          role: 'system',
-          content: `
+          model: process.env.LLM_MODEL || 'gpt-4.1-mini',
+          text: {
+            format: { type: 'json_object' },
+          },
+          input: [
+            {
+              role: 'system',
+              content: `
               You are a coffee catalogue assistant.
               You will be given:
               - a user query
@@ -102,13 +105,16 @@ export async function POST(req: Request) {
               - no duplicate properties on the JSON objects
               Return JSON only with original user query
             `,
+            },
+            {
+              role: 'user',
+              content: JSON.stringify({ query, results }),
+            },
+          ],
         },
-        {
-          role: 'user',
-          content: JSON.stringify({ query, results }),
-        },
-      ],
-    });
+        { signal }
+      )
+    );
 
     const payload = safeJson(resp.output_text);
     const parsed = RecommendResponseSchema.parse(payload);

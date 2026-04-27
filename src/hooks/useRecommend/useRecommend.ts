@@ -12,6 +12,7 @@ function recommend(query: string) {
   return apiJson<RecommendResponse, { query: string }>('/api/recommend', {
     method: 'POST',
     body: { query },
+    timeoutMs: 20_000,
   });
 }
 

@@ -12,6 +12,7 @@ function makeJsonResponse(body: unknown, init?: ResponseInit) {
 describe('apiJson', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.useRealTimers();
 
     vi.stubGlobal('fetch', vi.fn());
   });
@@ -58,6 +59,7 @@ describe('apiJson', () => {
       'x-custom': 'hello',
       'content-type': 'application/vnd.api+json',
     });
+    expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
   it('returns parsed JSON for OK responses', async () => {
@@ -86,6 +88,16 @@ describe('apiJson', () => {
     await expect(apiJson('/bad-json')).rejects.toMatchObject({
       status: 400,
       message: 'Request failed',
+      details: null,
+    } satisfies Partial<ApiError>);
+  });
+
+  it('turns timeout aborts into ApiError objects', async () => {
+    (fetch as any).mockRejectedValueOnce(new DOMException('Timed out', 'TimeoutError'));
+
+    await expect(apiJson('/slow')).rejects.toMatchObject({
+      status: 408,
+      message: 'Request timed out. Please try again.',
       details: null,
     } satisfies Partial<ApiError>);
   });

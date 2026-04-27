@@ -49,6 +49,7 @@ describe('useRecommend', () => {
     expect(apiJson).toHaveBeenCalledWith('/api/recommend', {
       method: 'POST',
       body: { query: 'espresso' },
+      timeoutMs: 20000,
     });
 
     expect(result.current.status).toBe('success');
