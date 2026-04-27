@@ -30,7 +30,7 @@ describe('embedText', () => {
     expect(createMock).toHaveBeenCalledWith({
       model: 'text-embedding-3-small',
       input: 'hello',
-    });
+    }, { signal: expect.any(AbortSignal) });
 
     expect(result).toEqual([0.1, 0.2, 0.3]);
   });
@@ -49,7 +49,7 @@ describe('embedText', () => {
     expect(createMock).toHaveBeenCalledWith({
       model: 'text-embedding-3-large',
       input: 'world',
-    });
+    }, { signal: expect.any(AbortSignal) });
 
     expect(result).toEqual([9, 8, 7]);
   });

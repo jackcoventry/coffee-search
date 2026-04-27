@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAbortLikeError, REQUEST_TIMEOUT_MESSAGE } from '@/lib/timeout';
 
 type ApiErrorLike = {
   retryAfterSeconds?: unknown;
@@ -16,13 +17,17 @@ function getRetryAfterSeconds(err: unknown) {
 }
 
 export function apiErrorResponse(err: unknown, fallbackStatus = 500) {
-  const status = getStatus(err, fallbackStatus);
+  const isTimeout = isAbortLikeError(err);
+  const status = isTimeout ? 504 : getStatus(err, fallbackStatus);
 
   if (status >= 500) {
     console.error(err);
   }
 
-  const res = NextResponse.json({ error: 'Request could not be processed.' }, { status });
+  const res = NextResponse.json(
+    { error: isTimeout ? REQUEST_TIMEOUT_MESSAGE : 'Request could not be processed.' },
+    { status }
+  );
   const retryAfterSeconds = getRetryAfterSeconds(err);
 
   if (status === 429 && retryAfterSeconds) {
