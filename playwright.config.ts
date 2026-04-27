@@ -18,6 +18,10 @@ export default defineConfig({
   },
   webServer: {
     command: `npm run start -- -p ${PORT}`,
+    env: {
+      NEXT_PUBLIC_USE_MOCK_RECOMMEND: 'true',
+      USE_MOCK_PRODUCTS: 'true',
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
     url: baseURL,
