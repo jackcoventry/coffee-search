@@ -1,9 +1,12 @@
 import { Pool } from 'pg';
+import { getOptionalNumberEnv, getRequiredEnv } from '@/lib/env';
+
+const databaseUrl = getRequiredEnv('DATABASE_URL');
 
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl,
   connectionTimeoutMillis: 5_000,
   idleTimeoutMillis: 10_000,
-  max: Number(process.env.DATABASE_POOL_MAX ?? 3),
-  ssl: process.env.DATABASE_URL?.includes('supabase') ? { rejectUnauthorized: false } : undefined,
+  max: getOptionalNumberEnv('DATABASE_POOL_MAX', 3),
+  ssl: databaseUrl.includes('supabase') ? { rejectUnauthorized: false } : undefined,
 });

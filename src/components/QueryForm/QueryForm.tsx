@@ -47,6 +47,7 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
     if (isLoading) return;
     onSubmit(data);
   };
+  const queryErrorId = 'query-error';
 
   return (
     <>
@@ -56,8 +57,17 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
         data-loading={isLoading}
       >
         <div className="query-form__content | p-3 overflow-hidden w-full lg:w-156.25">
-          <label htmlFor="query">
-            <h1 className="font-heading">{INTRO_TITLE}</h1>
+          <h1
+            className="font-heading"
+            id="query-heading"
+          >
+            {INTRO_TITLE}
+          </h1>
+          <label
+            className="sr-only"
+            htmlFor="query"
+          >
+            {INTRO_TITLE}
           </label>
           <div className="flex flex-col gap-6">
             <Controller
@@ -72,6 +82,8 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
                   data-valid={errors?.query ? 'false' : 'true'}
                   value={field.value}
                   id="query"
+                  aria-describedby={errors?.query ? queryErrorId : undefined}
+                  aria-invalid={errors?.query ? 'true' : 'false'}
                   className={`font-body focusable w-full border-b-2 p-4 outline${errors?.query ? ' outline-red-500' : ''}`}
                 />
               )}
@@ -89,7 +101,14 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
         </div>
       </form>
 
-      {errors.query && <Message type="error">{errors.query?.message}</Message>}
+      {errors.query && (
+        <Message
+          id={queryErrorId}
+          type="error"
+        >
+          {errors.query?.message}
+        </Message>
+      )}
     </>
   );
 }

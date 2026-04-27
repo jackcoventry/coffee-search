@@ -34,10 +34,12 @@ describe('Message', () => {
   });
 
   it('renders alert with children content', () => {
-    render(<Message>Error occurred</Message>);
+    render(<Message id="message-id">Error occurred</Message>);
 
     const alert = screen.getByRole('alert');
     expect(alert).toBeInTheDocument();
+    expect(alert).toHaveAttribute('aria-atomic', 'true');
+    expect(alert).toHaveAttribute('id', 'message-id');
     expect(alert).toHaveTextContent('Error occurred');
   });
 

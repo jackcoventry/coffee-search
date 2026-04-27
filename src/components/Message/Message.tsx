@@ -4,17 +4,20 @@ import { MessageType, getMessageType } from '@/utils/getMessageType';
 import { Button } from '@/components/Button/Button';
 
 type Props = {
+  id?: string;
   type?: MessageType;
 };
 
-export function Message({ children, type = 'error' }: PropsWithChildren<Props>) {
+export function Message({ children, id, type = 'error' }: PropsWithChildren<Props>) {
   const status = getMessageType(type);
   const [open, setOpen] = useState<boolean>(true);
 
   return open ? (
     <p
       className={`fixed flex items-center gap-3 z-20 bottom-5 right-5 p-4 ml-4 font-small border-2 max-w-2xl bg-white motion-safe:animate-bounce-in | ${status.borderColor}`}
+      id={id}
       role="alert"
+      aria-atomic="true"
     >
       <svg
         className="icon"

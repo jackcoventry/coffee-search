@@ -140,6 +140,31 @@ WHERE tablename = 'products';
 - Run coverage: `npm run test:coverage`
 - Run browser regression tests: `npm run test:e2e`
 
+## API contract
+
+### `POST /api/recommend`
+
+Request body:
+
+```json
+{ "query": "I want a sweet espresso coffee" }
+```
+
+- `query` must be a string between 2 and 150 characters.
+- Responses are JSON and include `query`, `introduction`, `results`, and `cached`.
+- Invalid input returns `400`; rate limits return `429` with `Retry-After`; upstream model validation failures return `502`; server timeouts return `504`.
+
+### `GET /api/products`
+
+Query params:
+
+- `limit` optional number from 1 to 500, default `100`.
+- `offset` optional number from 0 upward, default `0`.
+
+### `GET /api/health`
+
+Returns `{ "ok": true, "service": "coffee-search" }` for basic smoke checks.
+
 ## Development notes
 
 - Use `NEXT_PUBLIC_USE_MOCK_RECOMMEND=true` for fast local development without external API calls.

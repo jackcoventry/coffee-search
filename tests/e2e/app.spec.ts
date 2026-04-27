@@ -64,6 +64,25 @@ test.describe('homepage', () => {
 
     await expect(page.locator('p[role="alert"]')).toContainText('Too short!');
   });
+
+  test('supports search to product navigation', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+    await page.getByPlaceholder(/in your own words/i).fill('your very best coffee');
+    await page.getByRole('button', { name: /find my coffee/i }).click();
+
+    await expect(page.getByRole('heading', { name: /our recommendations/i })).toBeVisible();
+    const firstProductLink = page.getByRole('link', { name: /view product/i }).first();
+
+    await expect(firstProductLink).toHaveAttribute('href', /\/product\/100001/);
+    await firstProductLink.scrollIntoViewIfNeeded();
+    await Promise.all([
+      page.waitForURL(/\/product\/100001/, { timeout: 10_000 }),
+      firstProductLink.click(),
+    ]);
+    await expect(page.getByRole('heading', { level: 1, name: /golden lagoon/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /back to results/i })).toBeVisible();
+  });
 });
 
 test.describe('product page', () => {
