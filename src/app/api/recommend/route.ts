@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { toSql } from 'pgvector/pg';
 import { z } from 'zod';
 import { getClientIp } from '@/utils/getClientIp';
+import { apiErrorResponse } from '@/lib/apiErrorResponse';
 import { assertStrictApi } from '@/lib/apiGuard';
 import { getCache, setCache } from '@/lib/cacheResult';
 import { pool } from '@/lib/db';
@@ -138,15 +139,7 @@ export async function POST(req: Request) {
     await setCache(cacheKey, validatedPayload, 5 * 60_000);
 
     return NextResponse.json({ ...validatedPayload, cached: false });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    const status = err?.status ?? 500;
-    const res = NextResponse.json({ error: err.message ?? 'Unknown error' }, { status });
-
-    // If rate-limited
-    if (status === 429 && err.retryAfterSeconds) {
-      res.headers.set('Retry-After', String(err.retryAfterSeconds));
-    }
-    return res;
+  } catch (err) {
+    return apiErrorResponse(err);
   }
 }

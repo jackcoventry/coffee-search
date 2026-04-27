@@ -3,8 +3,6 @@ type Bucket = {
   resetAt: number;
 };
 
-import { getRedisConfig, redisCommand } from '@/lib/redisRest';
-
 const buckets = new Map<string, Bucket>();
 
 function rateLimitError(retryAfterSeconds: number) {
@@ -20,23 +18,6 @@ function rateLimitError(retryAfterSeconds: number) {
 }
 
 export async function rateLimitOrThrow(key: string, limit: number, windowMs: number): Promise<void> {
-  const config = getRedisConfig();
-  if (config) {
-    const count = await redisCommand<number>(['INCR', key]);
-    let retryAfterMs = await redisCommand<number>(['PTTL', key]);
-
-    if (count === 1 || retryAfterMs < 0) {
-      await redisCommand(['PEXPIRE', key, windowMs]);
-      retryAfterMs = windowMs;
-    }
-
-    if (count > limit) {
-      throw rateLimitError(Math.ceil(retryAfterMs / 1000));
-    }
-
-    return;
-  }
-
   const now = Date.now();
   const existing = buckets.get(key);
 

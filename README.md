@@ -17,8 +17,8 @@ Create a `.env` or `.env.local` file in the project root with the variables belo
 - `LLM_MODEL` (string) — the LLM model id to use for natural language queries (e.g. `gpt-4o`, or your chosen model).
 - `EMBED_MODEL` (string) — the embedding model id used to create vector embeddings.
 - `DATABASE_URL` (string) — Postgres connection string for storing products and vectors.
+- `DATABASE_POOL_MAX` (number, optional) — maximum Postgres connections per app instance. Defaults to `3`.
 - `OPENAI_API_KEY` (string) — your OpenAI API key.
-- `REDIS_REST_URL` (string, optional in development) — Redis REST endpoint with the REST token in URL credentials, used for shared recommendation caching and rate limiting in production. Example: `https://default:<url-encoded-token>@your-redis-host.upstash.io`.
 
 ## Installation
 
@@ -117,7 +117,7 @@ Note: The import script expects Node to be able to connect to your Postgres inst
 ## Development notes
 
 - Use `NEXT_PUBLIC_USE_MOCK_RECOMMEND=true` for fast local development without external API calls.
-- Configure `REDIS_REST_URL` in production so recommendation caching and rate limiting are shared across server instances. Without it, the app falls back to in-memory storage for local development.
+- Recommendation caching and rate limiting use in-memory storage. This is enough for a demo, but not a strong abuse-control mechanism across multiple server instances.
 - Icon tokens are generated with `npm run icons` and depend on the SVGs in `src/icons/`.
 
 ## Contributing

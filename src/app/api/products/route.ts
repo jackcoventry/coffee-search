@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { apiErrorResponse } from '@/lib/apiErrorResponse';
 import { getAllProducts } from '@/lib/getProducts';
 
 z.config({ jitless: true });
@@ -27,8 +28,7 @@ export async function GET(req: Request) {
       products,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 400 });
+  } catch (err) {
+    return apiErrorResponse(err, 400);
   }
 }

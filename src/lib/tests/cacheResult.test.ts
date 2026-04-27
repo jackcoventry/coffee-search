@@ -5,12 +5,10 @@ describe('cache utils', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(0);
-    vi.stubEnv('REDIS_REST_URL', '');
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    vi.unstubAllEnvs();
   });
 
   it('returns null when key does not exist', async () => {

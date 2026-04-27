@@ -5,12 +5,10 @@ describe('rateLimitOrThrow', () => {
     vi.useFakeTimers();
     vi.setSystemTime(0);
     vi.resetModules();
-    vi.stubEnv('REDIS_REST_URL', '');
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    vi.unstubAllEnvs();
   });
 
   it('allows the first call and creates a new bucket', async () => {
