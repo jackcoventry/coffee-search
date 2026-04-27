@@ -3,9 +3,40 @@ type Bucket = {
   resetAt: number;
 };
 
+import { getRedisConfig, redisCommand } from '@/lib/redisRest';
+
 const buckets = new Map<string, Bucket>();
 
-export function rateLimitOrThrow(key: string, limit: number, windowMs: number) {
+function rateLimitError(retryAfterSeconds: number) {
+  const err = new Error(`Rate limit exceeded. Retry after ${retryAfterSeconds}s`);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (err as any).status = 429;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (err as any).retryAfterSeconds = retryAfterSeconds;
+
+  return err;
+}
+
+export async function rateLimitOrThrow(key: string, limit: number, windowMs: number): Promise<void> {
+  const config = getRedisConfig();
+  if (config) {
+    const count = await redisCommand<number>(['INCR', key]);
+    let retryAfterMs = await redisCommand<number>(['PTTL', key]);
+
+    if (count === 1 || retryAfterMs < 0) {
+      await redisCommand(['PEXPIRE', key, windowMs]);
+      retryAfterMs = windowMs;
+    }
+
+    if (count > limit) {
+      throw rateLimitError(Math.ceil(retryAfterMs / 1000));
+    }
+
+    return;
+  }
+
   const now = Date.now();
   const existing = buckets.get(key);
 
@@ -16,14 +47,7 @@ export function rateLimitOrThrow(key: string, limit: number, windowMs: number) {
 
   if (existing.count >= limit) {
     const retryAfterSeconds = Math.ceil((existing.resetAt - now) / 1000);
-    const err = new Error(`Rate limit exceeded. Retry after ${retryAfterSeconds}s`);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (err as any).status = 429;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (err as any).retryAfterSeconds = retryAfterSeconds;
-    throw err;
+    throw rateLimitError(retryAfterSeconds);
   }
 
   existing.count += 1;

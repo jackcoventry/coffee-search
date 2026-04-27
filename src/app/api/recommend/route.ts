@@ -14,21 +14,31 @@ import { safeJson } from '@/lib/safeJson';
 z.config({ jitless: true });
 
 const Body = z.object({
-  query: z.string().min(2),
+  query: z.string().trim().min(2).max(150),
+});
+
+const RecommendationSchema = z.object({
+  name: z.string(),
+  sku: z.string(),
+  origin: z.array(z.string()),
+  description: z.string(),
+  reasons: z.array(z.string()).min(1).max(3),
+  tradeoff: z.string().optional(),
+});
+
+const RecommendResponseSchema = z.object({
+  query: z.string(),
+  introduction: z.string(),
+  results: z.array(RecommendationSchema).min(1).max(3),
 });
 
 export async function POST(req: Request) {
-  const apiKey = req.headers.get('x-api-key');
-  if (!process.env.NEXT_PUBLIC_API_KEY || apiKey !== process.env.NEXT_PUBLIC_API_KEY) {
-    return NextResponse.json({ error: 'Request could not be processed.' }, { status: 403 });
-  }
-
   try {
     assertStrictApi(req);
 
     const ip = getClientIp(req);
     // Throw error if rate limit exceeds per IP.
-    rateLimitOrThrow(`recommend:${ip}`, 10, 60_000);
+    await rateLimitOrThrow(`recommend:${ip}`, 10, 60_000);
 
     const { query } = Body.parse(await req.json());
     const g = guardUserInput(query); // Security gate for user queries!
@@ -39,8 +49,7 @@ export async function POST(req: Request) {
     const normalizedQuery = query.trim().toLowerCase();
 
     const cacheKey = `reco:${normalizedQuery}`;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cached = getCache<any>(cacheKey);
+    const cached = await getCache<z.infer<typeof RecommendResponseSchema>>(cacheKey);
 
     // If result already exists in cache, return the cache instead
     if (cached) return NextResponse.json({ ...cached, cached: true });
@@ -101,10 +110,34 @@ export async function POST(req: Request) {
     });
 
     const payload = safeJson(resp.output_text);
+    const parsed = RecommendResponseSchema.parse(payload);
+    const candidatesBySku = new Map(results.map((candidate) => [candidate.sku, candidate]));
 
-    setCache(cacheKey, payload, 5 * 60_000);
+    const validatedPayload = {
+      query,
+      introduction: parsed.introduction,
+      results: parsed.results
+        .map((result) => {
+          const candidate = candidatesBySku.get(result.sku);
+          if (!candidate) return null;
 
-    return NextResponse.json({ ...payload, cached: false });
+          return {
+            ...result,
+            name: candidate.name,
+            origin: candidate.origin,
+            description: candidate.description,
+          };
+        })
+        .filter((result): result is NonNullable<typeof result> => result !== null),
+    };
+
+    if (validatedPayload.results.length === 0) {
+      return NextResponse.json({ error: 'Request could not be processed.' }, { status: 502 });
+    }
+
+    await setCache(cacheKey, validatedPayload, 5 * 60_000);
+
+    return NextResponse.json({ ...validatedPayload, cached: false });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     const status = err?.status ?? 500;

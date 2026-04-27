@@ -5,59 +5,61 @@ describe('cache utils', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(0);
+    vi.stubEnv('REDIS_REST_URL', '');
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
   });
 
-  it('returns null when key does not exist', () => {
-    expect(getCache('missing')).toBeNull();
+  it('returns null when key does not exist', async () => {
+    await expect(getCache('missing')).resolves.toBeNull();
   });
 
-  it('returns stored value before ttl expires', () => {
-    setCache('a', 123, 1000);
+  it('returns stored value before ttl expires', async () => {
+    await setCache('a', 123, 1000);
 
-    expect(getCache<number>('a')).toBe(123);
+    await expect(getCache<number>('a')).resolves.toBe(123);
 
     vi.advanceTimersByTime(999);
-    expect(getCache<number>('a')).toBe(123);
+    await expect(getCache<number>('a')).resolves.toBe(123);
   });
 
-  it('returns null after ttl expires', () => {
-    setCache('b', 'hello', 1000);
+  it('returns null after ttl expires', async () => {
+    await setCache('b', 'hello', 1000);
 
     vi.advanceTimersByTime(1001);
-    expect(getCache<string>('b')).toBeNull();
+    await expect(getCache<string>('b')).resolves.toBeNull();
   });
 
-  it('deletes expired items so they do not persist', () => {
-    setCache('c', 'gone', 500);
+  it('deletes expired items so they do not persist', async () => {
+    await setCache('c', 'gone', 500);
 
     vi.advanceTimersByTime(600);
 
-    expect(getCache('c')).toBeNull();
-    expect(getCache('c')).toBeNull();
+    await expect(getCache('c')).resolves.toBeNull();
+    await expect(getCache('c')).resolves.toBeNull();
   });
 
-  it('overwrites existing key with new ttl and value', () => {
-    setCache('x', 1, 1000);
+  it('overwrites existing key with new ttl and value', async () => {
+    await setCache('x', 1, 1000);
 
     vi.advanceTimersByTime(500);
 
-    setCache('x', 2, 1000);
+    await setCache('x', 2, 1000);
 
-    expect(getCache<number>('x')).toBe(2);
+    await expect(getCache<number>('x')).resolves.toBe(2);
 
     vi.advanceTimersByTime(1001);
-    expect(getCache<number>('x')).toBeNull();
+    await expect(getCache<number>('x')).resolves.toBeNull();
   });
 
-  it('works with objects as values', () => {
+  it('works with objects as values', async () => {
     const obj = { a: 1 };
 
-    setCache('obj', obj, 1000);
+    await setCache('obj', obj, 1000);
 
-    expect(getCache<typeof obj>('obj')).toEqual({ a: 1 });
+    await expect(getCache<typeof obj>('obj')).resolves.toEqual({ a: 1 });
   });
 });

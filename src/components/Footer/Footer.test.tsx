@@ -5,7 +5,6 @@ import { Footer } from '@/components/Footer/Footer';
 vi.mock('@/consts/label', () => ({
   FOOTER_LINK_LABEL: 'View on GitHub',
   FOOTER_NOTE: 'Made with coffee.',
-  GITHUB_LINK_LABEL: 'GitHub repository',
   GITHUB_URL: 'https://github.com/example/repo',
 }));
 
@@ -26,7 +25,7 @@ describe('Footer', () => {
   it('renders the GitHub link with correct attributes and accessible name', () => {
     render(<Footer />);
 
-    const link = screen.getByRole('link', { name: 'GitHub repository' });
+    const link = screen.getByRole('link', { name: 'View on GitHub' });
 
     expect(link).toHaveAttribute('href', 'https://github.com/example/repo');
     expect(link).toHaveAttribute('target', '_blank');

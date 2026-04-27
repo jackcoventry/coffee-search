@@ -1,7 +1,6 @@
 import { META_DESCRIPTION, META_TITLE, SKIP_LABEL } from '@/consts/label';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
-import { connection } from 'next/server';
 import { Footer } from '@/components/Footer/Footer';
 import { Header } from '@/components/Header/Header';
 import '@/styles/globals.css';
@@ -32,11 +31,32 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  await connection();
-
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/DMMono-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/SpecialGothicCondensedOne-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/SpecialGothicExpandedOne-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <a
           href="#content"
@@ -47,7 +67,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <Header />
         <main id="content">{children}</main>
         <Footer />
-        {process.env.NODE_ENV === 'production' ? <Analytics /> : null}
+        {process.env.VERCEL_ENV === 'production' ? <Analytics /> : null}
       </body>
     </html>
   );

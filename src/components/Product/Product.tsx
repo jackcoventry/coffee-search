@@ -63,6 +63,7 @@ export function Product({
             className="product__image"
             height={620}
             width={620}
+            priority
           />
         </div>
         <div className="flex flex-col gap-6">

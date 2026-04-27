@@ -5,42 +5,44 @@ describe('rateLimitOrThrow', () => {
     vi.useFakeTimers();
     vi.setSystemTime(0);
     vi.resetModules();
+    vi.stubEnv('REDIS_REST_URL', '');
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
   });
 
   it('allows the first call and creates a new bucket', async () => {
     const { rateLimitOrThrow } = await import('@/lib/rateLimit');
 
-    expect(() => rateLimitOrThrow('k1', 3, 1000)).not.toThrow();
+    await expect(rateLimitOrThrow('k1', 3, 1000)).resolves.toBeUndefined();
   });
 
   it('increments count until the limit is reached', async () => {
     const { rateLimitOrThrow } = await import('@/lib/rateLimit');
 
-    expect(() => rateLimitOrThrow('k1', 3, 1000)).not.toThrow();
-    expect(() => rateLimitOrThrow('k1', 3, 1000)).not.toThrow();
-    expect(() => rateLimitOrThrow('k1', 3, 1000)).not.toThrow();
+    await expect(rateLimitOrThrow('k1', 3, 1000)).resolves.toBeUndefined();
+    await expect(rateLimitOrThrow('k1', 3, 1000)).resolves.toBeUndefined();
+    await expect(rateLimitOrThrow('k1', 3, 1000)).resolves.toBeUndefined();
   });
 
   it('throws when the limit would be exceeded', async () => {
     const { rateLimitOrThrow } = await import('@/lib/rateLimit');
 
-    rateLimitOrThrow('k1', 2, 1000);
-    rateLimitOrThrow('k1', 2, 1000);
+    await rateLimitOrThrow('k1', 2, 1000);
+    await rateLimitOrThrow('k1', 2, 1000);
 
-    expect(() => rateLimitOrThrow('k1', 2, 1000)).toThrow(/rate limit exceeded/i);
+    await expect(rateLimitOrThrow('k1', 2, 1000)).rejects.toThrow(/rate limit exceeded/i);
   });
 
   it('throws with status 429 and retryAfterSeconds', async () => {
     const { rateLimitOrThrow } = await import('@/lib/rateLimit');
 
-    rateLimitOrThrow('k1', 1, 1000);
+    await rateLimitOrThrow('k1', 1, 1000);
 
     try {
-      rateLimitOrThrow('k1', 1, 1000);
+      await rateLimitOrThrow('k1', 1, 1000);
       throw new Error('Expected to throw');
     } catch (err: any) {
       expect(err).toBeInstanceOf(Error);
@@ -53,33 +55,33 @@ describe('rateLimitOrThrow', () => {
   it('allows requests again after the window resets (now > resetAt)', async () => {
     const { rateLimitOrThrow } = await import('@/lib/rateLimit');
 
-    rateLimitOrThrow('k1', 1, 1000);
+    await rateLimitOrThrow('k1', 1, 1000);
 
     vi.advanceTimersByTime(1001);
 
-    expect(() => rateLimitOrThrow('k1', 1, 1000)).not.toThrow();
+    await expect(rateLimitOrThrow('k1', 1, 1000)).resolves.toBeUndefined();
   });
 
   it('does not reset exactly at resetAt (boundary: now === resetAt is still limited)', async () => {
     const { rateLimitOrThrow } = await import('@/lib/rateLimit');
 
-    rateLimitOrThrow('k1', 1, 1000);
+    await rateLimitOrThrow('k1', 1, 1000);
 
     vi.advanceTimersByTime(1000);
 
-    expect(() => rateLimitOrThrow('k1', 1, 1000)).toThrow(/rate limit exceeded/i);
+    await expect(rateLimitOrThrow('k1', 1, 1000)).rejects.toThrow(/rate limit exceeded/i);
 
     vi.advanceTimersByTime(1);
 
-    expect(() => rateLimitOrThrow('k1', 1, 1000)).not.toThrow();
+    await expect(rateLimitOrThrow('k1', 1, 1000)).resolves.toBeUndefined();
   });
 
   it('tracks separate keys independently', async () => {
     const { rateLimitOrThrow } = await import('@/lib/rateLimit');
 
-    rateLimitOrThrow('k1', 1, 1000);
+    await rateLimitOrThrow('k1', 1, 1000);
 
-    expect(() => rateLimitOrThrow('k2', 1, 1000)).not.toThrow();
-    expect(() => rateLimitOrThrow('k1', 1, 1000)).toThrow();
+    await expect(rateLimitOrThrow('k2', 1, 1000)).resolves.toBeUndefined();
+    await expect(rateLimitOrThrow('k1', 1, 1000)).rejects.toThrow();
   });
 });
