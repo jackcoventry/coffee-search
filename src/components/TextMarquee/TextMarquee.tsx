@@ -7,11 +7,11 @@ type Props = {
 
 export function TextMarquee({ children, height }: Readonly<Props>) {
   const repeats = 10;
-  const h = 'h-[' + height + 'px]';
 
   return (
     <div
-      className={`text-marquee | overflow-hidden whitespace-nowrap relative w-full opacity-10 [-webkit-text-size-adjust:100%] ${height ? h : ''}`}
+      className="text-marquee | overflow-hidden whitespace-nowrap relative w-full opacity-10 [-webkit-text-size-adjust:100%]"
+      style={height ? { height } : undefined}
       aria-hidden="true"
     >
       <div className="absolute left-0 top-0 inline-flex w-max transform-[translate3d(0,0,0)] backface-hidden will-change-transform animate-marquee-a">

@@ -29,13 +29,15 @@ export function useRecommend() {
         ? (mockResponse as unknown as RecommendResponse)
         : await recommend(query);
 
-      setTimeout(
-        () => {
+      if (USE_MOCK_RECOMMEND) {
+        setTimeout(() => {
           setData(result);
           setStatus('success');
-        },
-        USE_MOCK_RECOMMEND ? 2000 : 1000
-      );
+        }, 2000);
+      } else {
+        setData(result);
+        setStatus('success');
+      }
 
       return result;
     } catch (e) {

@@ -36,11 +36,7 @@ describe('QueryForm', () => {
 
     expect(screen.getByPlaceholderText('Search for something...')).toBeInTheDocument();
 
-    // Accessible name is from aria-label in the component
-    expect(screen.getByRole('button', { name: /submit search term/i })).toBeInTheDocument();
-
-    // Visible label still exists in DOM
-    expect(screen.getByText('Search')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Search' })).toBeInTheDocument();
   });
 
   it('submits valid query and calls onSubmit with data', async () => {
@@ -57,7 +53,7 @@ describe('QueryForm', () => {
     const input = screen.getByLabelText('What are you looking for?') as HTMLInputElement;
 
     await user.type(input, 'coffee');
-    await user.click(screen.getByRole('button', { name: /submit search term/i }));
+    await user.click(screen.getByRole('button', { name: 'Search' }));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     // IMPORTANT: your component calls onSubmit(data) with ONE argument
@@ -74,7 +70,7 @@ describe('QueryForm', () => {
       />
     );
 
-    await user.click(screen.getByRole('button', { name: /submit search term/i }));
+    await user.click(screen.getByRole('button', { name: 'Search' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Please enter a search term');
   });
@@ -92,7 +88,7 @@ describe('QueryForm', () => {
     const input = screen.getByLabelText('What are you looking for?') as HTMLInputElement;
 
     await user.type(input, 'a'.repeat(151));
-    await user.click(screen.getByRole('button', { name: /submit search term/i }));
+    await user.click(screen.getByRole('button', { name: 'Search' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Too long');
   });
@@ -109,7 +105,7 @@ describe('QueryForm', () => {
 
     const input = screen.getByLabelText('What are you looking for?') as HTMLInputElement;
 
-    await user.click(screen.getByRole('button', { name: /submit search term/i }));
+    await user.click(screen.getByRole('button', { name: 'Search' }));
 
     expect(input).toHaveAttribute('data-valid', 'false');
   });
@@ -127,7 +123,7 @@ describe('QueryForm', () => {
     const input = screen.getByLabelText('What are you looking for?') as HTMLInputElement;
 
     await user.type(input, 'hello');
-    await user.click(screen.getByRole('button', { name: /submit search term/i }));
+    await user.click(screen.getByRole('button', { name: 'Search' }));
 
     expect(screen.queryByRole('alert')).toBeNull();
     expect(input).toHaveAttribute('data-valid', 'true');
@@ -150,7 +146,7 @@ describe('QueryForm', () => {
     const input = screen.getByLabelText('What are you looking for?') as HTMLInputElement;
     expect(input).toBeDisabled();
 
-    const btn = screen.getByRole('button', { name: /submit search term/i }) as HTMLButtonElement;
+    const btn = screen.getByRole('button', { name: 'Search' }) as HTMLButtonElement;
     expect(btn).toBeDisabled();
 
     await user.click(btn);

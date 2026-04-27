@@ -40,18 +40,18 @@ describe('TextMarquee', () => {
     expect(screen.getAllByTestId('child')).toHaveLength(22);
   });
 
-  it('adds the height class when height prop is provided', () => {
+  it('sets the height style when height prop is provided', () => {
     const { container } = render(<TextMarquee height={120}>HELLO</TextMarquee>);
 
     const root = container.firstElementChild as HTMLElement;
-    expect(root.className).toContain('120px');
+    expect(root).toHaveStyle({ height: '120px' });
   });
 
-  it('does not add a height class when height is undefined', () => {
+  it('does not set a height style when height is undefined', () => {
     const { container } = render(<TextMarquee>HELLO</TextMarquee>);
 
     const root = container.firstElementChild as HTMLElement;
-    expect(root.className.includes('px')).toBe(false);
+    expect(root.style.height).toBe('');
   });
 
   it('contains an invisible buffer wrapper', () => {

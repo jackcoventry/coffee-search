@@ -82,7 +82,6 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
               disabled={isLoading}
               className="query-form__button | cursor-pointer mx-auto"
               icon="search"
-              aria-label="Submit search term"
             >
               {FORM_QUERY_BUTTON}
             </Button>

@@ -1,4 +1,4 @@
-import { FOOTER_LINK_LABEL, FOOTER_NOTE, GITHUB_LINK_LABEL, GITHUB_URL } from '@/consts/label';
+import { FOOTER_LINK_LABEL, FOOTER_NOTE, GITHUB_URL } from '@/consts/label';
 
 export function Footer() {
   return (
@@ -21,7 +21,6 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline focusable"
-            aria-label={GITHUB_LINK_LABEL}
           >
             {FOOTER_LINK_LABEL}
           </a>

@@ -46,15 +46,6 @@ describe('useRecommend', () => {
       await result.current.submit({ query: 'espresso' });
     });
 
-    // Immediately loading
-    expect(result.current.status).toBe('loading');
-    expect(result.current.error).toBeNull();
-
-    // Fast-forward timeout (0ms when not mock mode)
-    act(() => {
-      vi.runAllTimers();
-    });
-
     expect(apiJson).toHaveBeenCalledWith('/api/recommend', {
       method: 'POST',
       body: { query: 'espresso' },

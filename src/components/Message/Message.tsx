@@ -21,6 +21,7 @@ export function Message({ children, type = 'error' }: PropsWithChildren<Props>) 
         width="1.25em"
         height="1.25em"
         fill="currentColor"
+        aria-hidden
       >
         <use xlinkHref={`/icons/icons.svg#${status.icon}`} />
       </svg>
