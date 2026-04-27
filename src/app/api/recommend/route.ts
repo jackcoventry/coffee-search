@@ -10,6 +10,12 @@ import { embedText } from '@/lib/embeddings';
 import { guardUserInput } from '@/lib/guard';
 import { openai } from '@/lib/openai';
 import { rateLimitOrThrow } from '@/lib/rateLimit';
+import {
+  canonicalizeRecommendationResponse,
+  createNoCandidateResponse,
+  RecommendResponseSchema,
+  RECOMMENDATION_SYSTEM_PROMPT,
+} from '@/lib/recommendation';
 import { safeJson } from '@/lib/safeJson';
 import { withTimeout } from '@/lib/timeout';
 
@@ -17,21 +23,6 @@ z.config({ jitless: true });
 
 const Body = z.object({
   query: z.string().trim().min(2).max(150),
-});
-
-const RecommendationSchema = z.object({
-  name: z.string(),
-  sku: z.string(),
-  origin: z.array(z.string()),
-  description: z.string(),
-  reasons: z.array(z.string()).min(1).max(3),
-  tradeoff: z.string().optional(),
-});
-
-const RecommendResponseSchema = z.object({
-  query: z.string(),
-  introduction: z.string(),
-  results: z.array(RecommendationSchema).min(1).max(3),
 });
 
 export async function POST(req: Request) {
@@ -74,6 +65,12 @@ export async function POST(req: Request) {
       [embeddingSql]
     );
 
+    if (results.length === 0) {
+      const emptyPayload = createNoCandidateResponse(query);
+      await setCache(cacheKey, emptyPayload, 60_000);
+      return NextResponse.json({ ...emptyPayload, cached: false });
+    }
+
     const resp = await withTimeout(Number(process.env.OPENAI_TIMEOUT_MS ?? 12_000), (signal) =>
       openai.responses.create(
         {
@@ -84,27 +81,7 @@ export async function POST(req: Request) {
           input: [
             {
               role: 'system',
-              content: `
-              You are a coffee catalogue assistant.
-              You will be given:
-              - a user query
-              - a list of candidate coffees with their fields
-
-              Task:
-              1) Extract the user's preferences from the query (flavours, brew method, acidity/body/sweetness, roast).
-              2) Rank the best 3 coffees from the candidate list, into the property 'results'. Return the name, sku, origin and description fields as part of each result.
-              3) For each pick, provide 2-3 bullet reasons mapped to specific fields, under the property "reasons" of the result.
-              4) Provide one short tradeoff note for picks #2 and #3, under the property 'tradeoff' of the result.
-              5) use language in your response as if you're talking to the user directly
-              6) return a summary response to the user's query in the 'introduction' property of the data. Introduce the results briefly always with a casual, fun comment on their query.
-
-              Rules:
-              - ONLY choose from candidates (by SKU).
-              - Do not invent tasting notes, origins, or brew methods not present in the candidate fields.
-              - Keep each reason short and specific.
-              - no duplicate properties on the JSON objects
-              Return JSON only with original user query
-            `,
+              content: RECOMMENDATION_SYSTEM_PROMPT,
             },
             {
               role: 'user',
@@ -117,26 +94,7 @@ export async function POST(req: Request) {
     );
 
     const payload = safeJson(resp.output_text);
-    const parsed = RecommendResponseSchema.parse(payload);
-    const candidatesBySku = new Map(results.map((candidate) => [candidate.sku, candidate]));
-
-    const validatedPayload = {
-      query,
-      introduction: parsed.introduction,
-      results: parsed.results
-        .map((result) => {
-          const candidate = candidatesBySku.get(result.sku);
-          if (!candidate) return null;
-
-          return {
-            ...result,
-            name: candidate.name,
-            origin: candidate.origin,
-            description: candidate.description,
-          };
-        })
-        .filter((result): result is NonNullable<typeof result> => result !== null),
-    };
+    const validatedPayload = canonicalizeRecommendationResponse(payload, results, query);
 
     if (validatedPayload.results.length === 0) {
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 502 });

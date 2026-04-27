@@ -18,7 +18,7 @@
     "analyse": "next experimental-analyze",
     "lighthouse:local": "node src/scripts/lighthouse.local.mjs",
     "lighthouse:run": "node src/scripts/lighthouse.run.mjs",
-    "ci:local": "npm run lint && npm run typecheck &&  npm run test:run && npm run build",
+    "ci:local": "npm run lint && npm run typecheck && npm run test:run && npm run build && npm run test:e2e",
     "bundle:budget": "node src/scripts/check-bundle-size.mjs",
     "icon:tokens": "node src/scripts/generate-icons.mjs",
     "icons": "npm run icon:tokens && svg-sprite --config svg.json --log=info \"src/icons/*.svg\"",
