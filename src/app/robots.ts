@@ -1,3 +1,5 @@
+import { getAbsoluteUrl } from '@/lib/site';
+
 export default function robots() {
   return {
     rules: [
@@ -6,6 +8,6 @@ export default function robots() {
         disallow: '/', // This is intentional to hide from search engines; this is only an example site
       },
     ],
-    sitemap: 'https://coffee-search.vercel.app/sitemap.xml',
+    sitemap: getAbsoluteUrl('/sitemap.xml'),
   };
 }

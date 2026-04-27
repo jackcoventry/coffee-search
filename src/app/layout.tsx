@@ -3,10 +3,11 @@ import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Footer } from '@/components/Footer/Footer';
 import { Header } from '@/components/Header/Header';
+import { SITE_URL } from '@/lib/site';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://coffee-search.vercel.app'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: META_TITLE,
     template: '%s | ' + META_TITLE,
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: META_TITLE,
     description: META_DESCRIPTION,
-    url: 'https://coffee-search.vercel.app',
+    url: SITE_URL,
     siteName: META_TITLE,
     locale: 'en_GB',
     type: 'website',

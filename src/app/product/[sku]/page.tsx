@@ -3,12 +3,20 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { getProductBySku, getSimilarProductsBySku } from '@/lib/getProducts';
+import { getSafeReturnPath } from '@/lib/productLinks';
+import { getAbsoluteUrl } from '@/lib/site';
 import { Button } from '@/components/Button/Button';
 import { Product } from '@/components/Product/Product';
 import { PromoListing } from '@/components/PromoListing/PromoListing';
 
-export async function generateMetadata({ params }: { params: { sku: string } }): Promise<Metadata> {
-  const product = await getProductBySku(params.sku);
+type ProductPageProps = Readonly<{
+  params: Promise<{ sku: string }>;
+  searchParams: Promise<{ from?: string | string[] }>;
+}>;
+
+export async function generateMetadata({ params }: Pick<ProductPageProps, 'params'>): Promise<Metadata> {
+  const { sku } = await params;
+  const product = await getProductBySku(sku);
 
   if (!product) {
     return { title: 'Product Not Found' };
@@ -34,19 +42,16 @@ export async function generateMetadata({ params }: { params: { sku: string } }):
 export default async function ProductPage({
   params,
   searchParams,
-}: Readonly<{
-  params: Promise<{ sku: string }>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  searchParams: any;
-}>) {
+}: ProductPageProps) {
   const { sku } = await params;
-  const from = (await searchParams)?.from ?? '/';
+  const from = getSafeReturnPath((await searchParams).from);
   const product = await getProductBySku(sku);
-  const otherProducts = await getSimilarProductsBySku(sku, 3);
 
   if (!product) notFound();
 
-  const url = `https://coffee-search.vercel.app/product/${product.sku}`;
+  const otherProducts = await getSimilarProductsBySku(sku, 3);
+
+  const url = getAbsoluteUrl(`/product/${product.sku}`);
 
   const jsonLd = {
     '@context': 'https://schema.org',

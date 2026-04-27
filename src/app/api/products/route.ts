@@ -11,24 +11,33 @@ const QuerySchema = z.object({
 });
 
 export async function GET(req: Request) {
+  const startedAt = Date.now();
+
   try {
     const { searchParams } = new URL(req.url);
 
-    const parsed = QuerySchema.parse({
+    const parsed = QuerySchema.safeParse({
       limit: searchParams.get('limit'),
       offset: searchParams.get('offset'),
     });
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
+    }
 
-    const products = await getAllProducts(parsed.limit, parsed.offset);
+    const products = await getAllProducts(parsed.data.limit, parsed.data.offset);
 
     return NextResponse.json({
       count: products.length,
-      limit: parsed.limit,
-      offset: parsed.offset,
+      limit: parsed.data.limit,
+      offset: parsed.data.offset,
       products,
     });
 
   } catch (err) {
-    return apiErrorResponse(err, 400);
+    return apiErrorResponse(err, 500, {
+      durationMs: Date.now() - startedAt,
+      method: req.method,
+      route: '/api/products',
+    });
   }
 }
