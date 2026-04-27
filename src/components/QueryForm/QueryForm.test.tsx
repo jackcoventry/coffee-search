@@ -16,7 +16,14 @@ vi.mock('@/components/Button/Button', () => ({
 }));
 
 vi.mock('@/components/Message/Message', () => ({
-  Message: ({ children }: any) => <div role="alert">{children}</div>,
+  Message: ({ children, id }: any) => (
+    <div
+      id={id}
+      role="alert"
+    >
+      {children}
+    </div>
+  ),
 }));
 
 describe('QueryForm', () => {
@@ -108,6 +115,8 @@ describe('QueryForm', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     expect(input).toHaveAttribute('data-valid', 'false');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription('Please enter a search term');
   });
 
   it('sets data-valid="true" on input when there is no error', async () => {
@@ -127,6 +136,8 @@ describe('QueryForm', () => {
 
     expect(screen.queryByRole('alert')).toBeNull();
     expect(input).toHaveAttribute('data-valid', 'true');
+    expect(input).toHaveAttribute('aria-invalid', 'false');
+    expect(input).not.toHaveAttribute('aria-describedby');
   });
 
   it('when isLoading is true: disables input and submit button, sets data-loading, and blocks submit', async () => {

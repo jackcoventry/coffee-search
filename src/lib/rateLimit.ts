@@ -5,16 +5,15 @@ type Bucket = {
 
 const buckets = new Map<string, Bucket>();
 
-function rateLimitError(retryAfterSeconds: number) {
-  const err = new Error(`Rate limit exceeded. Retry after ${retryAfterSeconds}s`);
+export class RateLimitError extends Error {
+  retryAfterSeconds: number;
+  status = 429;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (err as any).status = 429;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (err as any).retryAfterSeconds = retryAfterSeconds;
-
-  return err;
+  constructor(retryAfterSeconds: number) {
+    super(`Rate limit exceeded. Retry after ${retryAfterSeconds}s`);
+    this.name = 'RateLimitError';
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
 }
 
 export async function rateLimitOrThrow(key: string, limit: number, windowMs: number): Promise<void> {
@@ -28,7 +27,7 @@ export async function rateLimitOrThrow(key: string, limit: number, windowMs: num
 
   if (existing.count >= limit) {
     const retryAfterSeconds = Math.ceil((existing.resetAt - now) / 1000);
-    throw rateLimitError(retryAfterSeconds);
+    throw new RateLimitError(retryAfterSeconds);
   }
 
   existing.count += 1;
