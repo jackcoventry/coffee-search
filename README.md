@@ -109,20 +109,39 @@ This will:
 
 Note: The import script expects Node to be able to connect to your Postgres instance via `DATABASE_URL`.
 
+## Database setup
+
+The recommendation query uses `pgvector` cosine distance against `products.embedding`. Make sure the extension and vector index exist:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS products_embedding_active_hnsw_idx
+ON products
+USING hnsw (embedding vector_cosine_ops)
+WHERE embedding IS NOT NULL
+  AND (is_active IS NULL OR is_active = true);
+```
+
+To inspect existing product indexes:
+
+```sql
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE tablename = 'products';
+```
+
 ## Testing
 
 - Run unit tests: `npm test`
 - Run coverage: `npm run test:coverage`
+- Run browser regression tests: `npm run test:e2e`
 
 ## Development notes
 
 - Use `NEXT_PUBLIC_USE_MOCK_RECOMMEND=true` for fast local development without external API calls.
 - Recommendation caching and rate limiting use in-memory storage. This is enough for a demo, but not a strong abuse-control mechanism across multiple server instances.
 - Icon tokens are generated with `npm run icons` and depend on the SVGs in `src/icons/`.
-
-## Contributing
-
-If you'd like to contribute, open an issue or PR. Keep changes focused and add tests for new behaviors.
 
 ## License
 

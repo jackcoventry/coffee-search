@@ -32,7 +32,9 @@ test.describe('homepage', () => {
     await expectNoPageProblems(errors);
   });
 
-  test('supports keyboard navigation through the primary controls', async ({ page }) => {
+  test('supports keyboard navigation through the primary controls', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Mobile browsers do not expose hardware Tab focus consistently.');
+
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     await page.keyboard.press('Tab');
