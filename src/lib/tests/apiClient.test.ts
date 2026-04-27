@@ -13,8 +13,6 @@ describe('apiJson', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
 
-    process.env.NEXT_PUBLIC_API_KEY = 'test-api-key';
-
     vi.stubGlobal('fetch', vi.fn());
   });
 
@@ -57,7 +55,6 @@ describe('apiJson', () => {
 
     const [, init] = (fetch as any).mock.calls[0];
     expect(init.headers).toMatchObject({
-      'x-api-key': 'test-api-key',
       'x-custom': 'hello',
       'content-type': 'application/vnd.api+json',
     });

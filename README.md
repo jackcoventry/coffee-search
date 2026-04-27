@@ -14,11 +14,11 @@ Coffee Search is a sample Next.js + TypeScript application that demonstrates how
 Create a `.env` or `.env.local` file in the project root with the variables below. Example values and types are shown:
 
 - `NEXT_PUBLIC_USE_MOCK_RECOMMEND` (boolean) — set to `true` to use built-in mock data instead of calling the API.
-- `NEXT_PUBLIC_API_KEY` (string) — shared secret required by the client to call the API routes.
 - `LLM_MODEL` (string) — the LLM model id to use for natural language queries (e.g. `gpt-4o`, or your chosen model).
 - `EMBED_MODEL` (string) — the embedding model id used to create vector embeddings.
 - `DATABASE_URL` (string) — Postgres connection string for storing products and vectors.
 - `OPENAI_API_KEY` (string) — your OpenAI API key.
+- `REDIS_REST_URL` (string, optional in development) — Redis REST endpoint with the REST token in URL credentials, used for shared recommendation caching and rate limiting in production. Example: `https://default:<url-encoded-token>@your-redis-host.upstash.io`.
 
 ## Installation
 
@@ -117,7 +117,7 @@ Note: The import script expects Node to be able to connect to your Postgres inst
 ## Development notes
 
 - Use `NEXT_PUBLIC_USE_MOCK_RECOMMEND=true` for fast local development without external API calls.
-- The app uses `NEXT_PUBLIC_API_KEY` for a simple client-to-server security header check — keep this secret in production.
+- Configure `REDIS_REST_URL` in production so recommendation caching and rate limiting are shared across server instances. Without it, the app falls back to in-memory storage for local development.
 - Icon tokens are generated with `npm run icons` and depend on the SVGs in `src/icons/`.
 
 ## Contributing

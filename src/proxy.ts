@@ -1,10 +1,10 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-function buildCsp(nonce: string, isDev: boolean) {
+function buildCsp(isDev: boolean) {
   const scriptSrc = isDev
-    ? `script-src 'self' 'nonce-${nonce}' 'unsafe-eval'`
-    : `script-src 'self' 'nonce-${nonce}'`;
+    ? `script-src 'self' 'unsafe-inline' 'unsafe-eval'`
+    : `script-src 'self' 'unsafe-inline'`;
 
   return [
     `default-src 'self'`,
@@ -21,13 +21,11 @@ function buildCsp(nonce: string, isDev: boolean) {
 }
 
 export function proxy(req: NextRequest) {
-  const nonce = crypto.randomUUID().replace(/-/g, '');
   const isDev = process.env.NODE_ENV !== 'production';
 
-  const csp = buildCsp(nonce, isDev);
+  const csp = buildCsp(isDev);
 
   const requestHeaders = new Headers(req.headers);
-  requestHeaders.set('x-nonce', nonce);
   requestHeaders.set('Content-Security-Policy', csp);
 
   const res = NextResponse.next({
