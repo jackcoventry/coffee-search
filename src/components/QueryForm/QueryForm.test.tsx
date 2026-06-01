@@ -82,6 +82,26 @@ describe('QueryForm', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Please enter a search term');
   });
 
+  it('shows min-length error when query has only one character', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+
+    render(
+      <QueryForm
+        onSubmit={onSubmit}
+        isLoading={false}
+      />
+    );
+
+    const input = screen.getByLabelText('What are you looking for?') as HTMLInputElement;
+
+    await user.type(input, 'a');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Please enter a search term');
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it('shows max-length error when query exceeds 150 chars', async () => {
     const user = userEvent.setup();
 

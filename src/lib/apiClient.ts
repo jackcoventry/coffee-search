@@ -6,6 +6,17 @@ export type ApiError = {
   details?: unknown;
 };
 
+export class ApiRequestError extends Error implements ApiError {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly details?: unknown
+  ) {
+    super(message);
+    this.name = 'ApiRequestError';
+  }
+}
+
 async function safeJson(res: Response) {
   try {
     return await res.json();
@@ -43,11 +54,7 @@ export async function apiJson<TResponse, TBody = unknown>(
     );
   } catch (err) {
     if (isAbortLikeError(err)) {
-      throw {
-        message: 'Request timed out. Please try again.',
-        status: 408,
-        details: null,
-      } satisfies ApiError;
+      throw new ApiRequestError('Request timed out. Please try again.', 408, null);
     }
     throw err;
   }
@@ -58,8 +65,7 @@ export async function apiJson<TResponse, TBody = unknown>(
     const message =
       (json && typeof json?.error === 'string' && json.error) || res.statusText || 'Request failed';
 
-    const err: ApiError = { message, status: res.status, details: json };
-    throw err;
+    throw new ApiRequestError(message, res.status, json);
   }
 
   return json as TResponse;

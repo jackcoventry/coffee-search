@@ -17,7 +17,7 @@ import './QueryForm.css';
 z.config({ jitless: true });
 
 const QueryFormSchema = z.object({
-  query: z.string().min(1, FORM_QUERY_ERROR_MIN).max(150, FORM_QUERY_ERROR_MAX),
+  query: z.string().min(2, FORM_QUERY_ERROR_MIN).max(150, FORM_QUERY_ERROR_MAX),
 });
 
 export type QueryFormSchemaType = z.infer<typeof QueryFormSchema>;

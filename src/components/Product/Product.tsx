@@ -60,7 +60,7 @@ export function Product({
           <Image
             src="/pack.webp"
             alt={packShotAlt}
-            className="product__image max-xl:order-2 max-xl:mb-8 max-xl:mx-auto max-xl:max-w-2xs xl:w-155 xl:h-155"
+            className="product__image | h-auto w-full max-xl:order-2 max-xl:mb-8 max-xl:mx-auto max-xl:max-w-2xs xl:max-w-155"
             height={620}
             width={620}
             priority
@@ -89,7 +89,10 @@ export function Product({
               {roast_level && (
                 <div className="flex flex-col gap-1 w-full">
                   <h2 className="font-title">{PRODUCT_ROAST_LEVEL}</h2>
-                  <Scale value={roast_level} />
+                  <Scale
+                    label={PRODUCT_ROAST_LEVEL}
+                    value={roast_level}
+                  />
                 </div>
               )}
               {origin && origin.length > 0 ? (

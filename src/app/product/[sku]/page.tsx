@@ -14,7 +14,9 @@ type ProductPageProps = Readonly<{
   searchParams: Promise<{ from?: string | string[] }>;
 }>;
 
-export async function generateMetadata({ params }: Pick<ProductPageProps, 'params'>): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: Pick<ProductPageProps, 'params'>): Promise<Metadata> {
   const { sku } = await params;
   const product = await getProductBySku(sku);
 
@@ -39,10 +41,7 @@ export async function generateMetadata({ params }: Pick<ProductPageProps, 'param
   };
 }
 
-export default async function ProductPage({
-  params,
-  searchParams,
-}: ProductPageProps) {
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const { sku } = await params;
   const from = getSafeReturnPath((await searchParams).from);
   const product = await getProductBySku(sku);
@@ -83,6 +82,7 @@ export default async function ProductPage({
               href="#"
               icon="trolley"
               variant="secondary"
+              aria-hidden="true" // Hides from screen readers since the link is not functional
             >
               {BUY_NOW}
             </Button>
