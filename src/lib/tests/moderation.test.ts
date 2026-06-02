@@ -22,10 +22,13 @@ describe('moderateUserInput', () => {
     mocks.moderationCreate.mockResolvedValue({ results: [{ flagged: false }, { flagged: false }] });
 
     await expect(moderateUserInput('recommend coffee')).resolves.toEqual({ flagged: false });
-    expect(mocks.moderationCreate).toHaveBeenCalledWith({
-      input: 'recommend coffee',
-      model: 'omni-moderation-latest',
-    });
+    expect(mocks.moderationCreate).toHaveBeenCalledWith(
+      {
+        input: 'recommend coffee',
+        model: 'omni-moderation-latest',
+      },
+      { signal: expect.any(AbortSignal) }
+    );
   });
 
   it('returns true when any moderation result is flagged', async () => {

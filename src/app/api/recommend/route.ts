@@ -32,93 +32,102 @@ const Body = z.object({
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
+  const stages: Record<string, number> = {};
+  const timed = async <T,>(stage: string, run: () => Promise<T>) => {
+    const stageStartedAt = Date.now();
+    try {
+      return await run();
+    } finally {
+      stages[stage] = Date.now() - stageStartedAt;
+    }
+  };
 
   try {
     assertStrictApi(req);
 
     const ip = getClientIp(req);
-    // Throw error if rate limit exceeds per IP.
-    await rateLimitOrThrow(`recommend:${ip}`, 10, 60_000);
+    await timed('rateLimit', () => rateLimitOrThrow(`recommend:${ip}`, 10, 60_000));
 
-    const json = await req.json().catch(() => null);
+    const json = await timed('parseBody', () => req.json().catch(() => null));
     const body = Body.safeParse(json);
     if (!body.success) {
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
     }
 
     const { query } = body.data;
-    const g = guardUserInput(query); // Security gate for user queries!
+    const g = guardUserInput(query);
     if (!g.ok) {
-      await rateLimitOrThrow(
-        `recommend-blocked:${ip}`,
-        BLOCKED_PROMPT_LIMIT,
-        BLOCKED_PROMPT_WINDOW_MS
+      await timed('blockedRateLimit', () =>
+        rateLimitOrThrow(`recommend-blocked:${ip}`, BLOCKED_PROMPT_LIMIT, BLOCKED_PROMPT_WINDOW_MS)
       );
       console.warn('api_guard_blocked', {
         durationMs: Date.now() - startedAt,
         method: req.method,
         reason: g.reason,
         route: '/api/recommend',
-        status: 400,
-      });
-      return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
-    }
-
-    const moderation = await moderateUserInput(query);
-    if (moderation.flagged) {
-      await rateLimitOrThrow(
-        `recommend-blocked:${ip}`,
-        BLOCKED_PROMPT_LIMIT,
-        BLOCKED_PROMPT_WINDOW_MS
-      );
-      console.warn('api_guard_blocked', {
-        durationMs: Date.now() - startedAt,
-        method: req.method,
-        reason: 'moderation',
-        route: '/api/recommend',
+        stages,
         status: 400,
       });
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
     }
 
     const normalizedQuery = query.trim().toLowerCase();
-
     const cacheKey = `reco:${normalizedQuery}`;
-    const cached = await getCache<z.infer<typeof RecommendResponseSchema>>(cacheKey);
+    const cached = await timed('cacheRead', () =>
+      getCache<z.infer<typeof RecommendResponseSchema>>(cacheKey)
+    );
 
-    // If result already exists in cache, return the cache instead
     if (cached) {
       console.info('api_request', {
         cached: true,
         durationMs: Date.now() - startedAt,
         method: req.method,
         route: '/api/recommend',
+        stages,
         status: 200,
       });
       return NextResponse.json({ ...cached, cached: true });
     }
 
-    const embedding = await embedText(query);
+    const moderation = await timed('moderation', () => moderateUserInput(query));
+    if (moderation.flagged) {
+      await timed('blockedRateLimit', () =>
+        rateLimitOrThrow(`recommend-blocked:${ip}`, BLOCKED_PROMPT_LIMIT, BLOCKED_PROMPT_WINDOW_MS)
+      );
+      console.warn('api_guard_blocked', {
+        durationMs: Date.now() - startedAt,
+        method: req.method,
+        reason: 'moderation',
+        route: '/api/recommend',
+        stages,
+        status: 400,
+      });
+      return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
+    }
+
+    const embedding = await timed('embedding', () => embedText(query));
     const embeddingSql = toSql(embedding);
 
-    const { rows: results } = await pool.query(
-      `
-        SELECT
-          id, sku, name, category, origin, tasting_notes, recommended_for,
-          roast_level, body, sweetness, acidity, description, weight_g,
-          (embedding <=> $1::vector) AS distance
-        FROM products
-        WHERE embedding IS NOT NULL
-          AND (is_active IS NULL OR is_active = true)
-        ORDER BY distance ASC
-        LIMIT 5;
-    `,
-      [embeddingSql]
+    const { rows: results } = await timed('vectorQuery', () =>
+      pool.query(
+        `
+          SELECT
+            id, sku, name, category, origin, tasting_notes, recommended_for,
+            roast_level, body, sweetness, acidity, description, weight_g,
+            (embedding <=> $1::vector) AS distance
+          FROM products
+          WHERE embedding IS NOT NULL
+            AND (is_active IS NULL OR is_active = true)
+          ORDER BY distance ASC
+          LIMIT 5;
+      `,
+        [embeddingSql]
+      )
     );
 
     if (results.length === 0) {
       const emptyPayload = createNoCandidateResponse(query);
-      await setCache(cacheKey, emptyPayload, 60_000);
+      await timed('cacheWrite', () => setCache(cacheKey, emptyPayload, 60_000));
       console.info('api_request', {
         cached: false,
         candidateCount: 0,
@@ -126,30 +135,39 @@ export async function POST(req: Request) {
         method: req.method,
         resultCount: 0,
         route: '/api/recommend',
+        stages,
         status: 200,
       });
       return NextResponse.json({ ...emptyPayload, cached: false });
     }
 
-    const resp = await withTimeout(getOptionalNumberEnv('OPENAI_TIMEOUT_MS', 12_000), (signal) =>
-      openai.responses.create(
-        {
-          model: process.env.LLM_MODEL || 'gpt-4.1-mini',
-          text: {
-            format: { type: 'json_object' },
+    const llmTimeoutMs = getOptionalNumberEnv(
+      'LLM_TIMEOUT_MS',
+      getOptionalNumberEnv('OPENAI_TIMEOUT_MS', 25_000)
+    );
+    const resp = await timed('llm', () =>
+      withTimeout(llmTimeoutMs, (signal) =>
+        openai.responses.create(
+          {
+            max_output_tokens: 700,
+            model: process.env.LLM_MODEL || 'gpt-4.1-mini',
+            text: {
+              format: { type: 'json_object' },
+            },
+            input: [
+              {
+                role: 'system',
+                content: RECOMMENDATION_SYSTEM_PROMPT,
+              },
+              {
+                role: 'user',
+                content: JSON.stringify({ query, results }),
+              },
+            ],
+            temperature: 0.3,
           },
-          input: [
-            {
-              role: 'system',
-              content: RECOMMENDATION_SYSTEM_PROMPT,
-            },
-            {
-              role: 'user',
-              content: JSON.stringify({ query, results }),
-            },
-          ],
-        },
-        { signal }
+          { signal }
+        )
       )
     );
 
@@ -166,7 +184,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 502 });
     }
 
-    await setCache(cacheKey, validatedPayload, 5 * 60_000);
+    await timed('cacheWrite', () => setCache(cacheKey, validatedPayload, 5 * 60_000));
 
     console.info('api_request', {
       cached: false,
@@ -175,6 +193,7 @@ export async function POST(req: Request) {
       method: req.method,
       resultCount: validatedPayload.results.length,
       route: '/api/recommend',
+      stages,
       status: 200,
     });
 
@@ -184,6 +203,7 @@ export async function POST(req: Request) {
       durationMs: Date.now() - startedAt,
       method: req.method,
       route: '/api/recommend',
+      stages,
     });
   }
 }
