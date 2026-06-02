@@ -196,4 +196,15 @@ describe('/api/recommend', () => {
     expect(res.headers.get('Retry-After')).toBe('12');
     expect(await res.json()).toEqual({ error: 'Request could not be processed.' });
   });
+
+  it('returns timeout response when downstream recommendation request is aborted', async () => {
+    const { POST } = await import('@/app/api/recommend/route');
+    mocks.openaiCreate.mockRejectedValue(new Error('Request was aborted.'));
+
+    const res = await POST(request({ query: 'espresso' }));
+
+    expect(res.status).toBe(504);
+    expect(await res.json()).toEqual({ error: 'Request timed out. Please try again.' });
+    expect(mocks.setCache).not.toHaveBeenCalled();
+  });
 });

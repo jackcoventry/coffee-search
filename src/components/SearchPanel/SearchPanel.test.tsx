@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchPanel } from '@/components/SearchPanel/SearchPanel';
 
 vi.mock('@/consts/label', () => ({
@@ -7,6 +7,11 @@ vi.mock('@/consts/label', () => ({
   INTRO_MARQUEE: 'Intro marquee',
   NEW_SEARCH: 'New search',
   SEARCH_ERROR_TITLE: 'Search failed',
+  SEARCH_LOADING_PHRASES: [
+    'Fetching your coffee',
+    'Crunching those beans',
+    'Checking the roast notes',
+  ],
 }));
 
 const replaceMock = vi.fn();
@@ -113,6 +118,10 @@ describe('SearchPanel', () => {
     vi.stubGlobal('scrollTo', vi.fn());
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders QueryForm when there are no results', () => {
     render(<SearchPanel />);
 
@@ -134,6 +143,35 @@ describe('SearchPanel', () => {
 
     expect(screen.getByTestId('results')).toBeInTheDocument();
     expect(screen.queryByTestId('query-form')).toBeNull();
+  });
+
+  it('renders loading text under the coffee icon when loading', () => {
+    recommendState.isLoading = true;
+
+    render(<SearchPanel />);
+
+    expect(screen.getByText('Fetching your coffee')).toBeInTheDocument();
+  });
+
+  it('rotates loading text while loading', () => {
+    vi.useFakeTimers();
+    recommendState.isLoading = true;
+
+    render(<SearchPanel />);
+
+    expect(screen.getByText('Fetching your coffee')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1800);
+    });
+
+    expect(screen.getByText('Crunching those beans')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1800);
+    });
+
+    expect(screen.getByText('Checking the roast notes')).toBeInTheDocument();
   });
 
   it('calls submit from query param on mount when query exists and results are not showing', async () => {

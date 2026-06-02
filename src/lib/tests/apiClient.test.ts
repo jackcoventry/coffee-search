@@ -101,4 +101,14 @@ describe('apiJson', () => {
       details: null,
     } satisfies Partial<ApiError>);
   });
+
+  it('turns plain aborted request errors into ApiError objects', async () => {
+    (fetch as any).mockRejectedValueOnce(new Error('Request was aborted.'));
+
+    await expect(apiJson('/aborted')).rejects.toMatchObject({
+      status: 408,
+      message: 'Request timed out. Please try again.',
+      details: null,
+    } satisfies Partial<ApiError>);
+  });
 });

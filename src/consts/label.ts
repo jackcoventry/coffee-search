@@ -14,6 +14,12 @@ export const FORM_QUERY_PLACEHOLDER = 'in your own words...';
 export const FORM_QUERY_BUTTON = 'Find my coffee';
 export const FORM_QUERY_ERROR_MIN = 'Too short!';
 export const FORM_QUERY_ERROR_MAX = 'Too long!';
+export const SEARCH_LOADING_PHRASES = [
+  'Fetching your coffee',
+  'Crunching those beans',
+  'Checking the roast notes',
+  'Warming up the grinder',
+];
 export const SEARCH_ERROR_TITLE = 'Search failed';
 export const SEARCH_ERROR_DEFAULT = 'We could not get recommendations. Please try again.';
 export const SEARCH_ERROR_BAD_REQUEST =

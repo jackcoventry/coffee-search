@@ -1,9 +1,15 @@
 'use client';
 
-import { BACK_TO_TOP, INTRO_MARQUEE, NEW_SEARCH, SEARCH_ERROR_TITLE } from '@/consts/label';
+import {
+  BACK_TO_TOP,
+  INTRO_MARQUEE,
+  NEW_SEARCH,
+  SEARCH_ERROR_TITLE,
+  SEARCH_LOADING_PHRASES,
+} from '@/consts/label';
 import { useRecommend } from '@/hooks/useRecommend/useRecommend';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/Button/Button';
 import { Message } from '@/components/Message/Message';
 import { QueryForm } from '@/components/QueryForm/QueryForm';
@@ -71,6 +77,7 @@ export function SearchPanel() {
             >
               <use xlinkHref="/icons/icons.svg#cup-hot" />
             </svg>
+            {isLoading ? <LoadingMessage /> : null}
             <QueryForm
               onSubmit={handleSubmit}
               isLoading={isLoading}
@@ -112,5 +119,28 @@ export function SearchPanel() {
 
       {error && !showResults ? <Message title={SEARCH_ERROR_TITLE}>{error}</Message> : null}
     </>
+  );
+}
+
+function LoadingMessage() {
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const phrase = SEARCH_LOADING_PHRASES[phraseIndex];
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setPhraseIndex((index) => (index + 1) % SEARCH_LOADING_PHRASES.length);
+    }, 1800);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  return (
+    <p
+      className="font-body text-center"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {phrase}
+    </p>
   );
 }
