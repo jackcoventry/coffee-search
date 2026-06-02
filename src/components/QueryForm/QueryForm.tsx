@@ -12,7 +12,6 @@ import { useId } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import z from 'zod';
 import { Button } from '@/components/Button/Button';
-import { Message } from '@/components/Message/Message';
 import './QueryForm.css';
 
 z.config({ jitless: true });
@@ -54,65 +53,63 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
   const queryHeadingId = `${formId}-query-heading`;
 
   return (
-    <>
-      <form
-        onSubmit={handleSubmit(submitHandler)}
-        className="query-form | grid"
-        data-loading={isLoading}
-      >
-        <div className="query-form__content | p-3 overflow-hidden w-full lg:w-156.25">
-          <h1
-            className="font-heading"
-            id={queryHeadingId}
-          >
-            {INTRO_TITLE}
-          </h1>
-          <label
-            className="sr-only"
-            htmlFor={queryId}
-          >
-            {INTRO_TITLE}
-          </label>
-          <div className="flex flex-col gap-6">
-            <Controller
-              name="query"
-              control={control}
-              disabled={isLoading}
-              render={({ field }) => (
-                <input
-                  type="text"
-                  {...field}
-                  placeholder={FORM_QUERY_PLACEHOLDER}
-                  data-valid={errors?.query ? 'false' : 'true'}
-                  value={field.value}
-                  id={queryId}
-                  aria-describedby={errors?.query ? queryErrorId : undefined}
-                  aria-invalid={errors?.query ? 'true' : 'false'}
-                  className={`font-body focusable w-full border-b-2 p-4 outline${errors?.query ? ' outline-red-500' : ''}`}
-                />
-              )}
-            />
-
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="query-form__button | cursor-pointer mx-auto"
-              icon="search"
-            >
-              {FORM_QUERY_BUTTON}
-            </Button>
-          </div>
-        </div>
-      </form>
-
-      {errors.query && (
-        <Message
-          id={queryErrorId}
-          type="error"
+    <form
+      onSubmit={handleSubmit(submitHandler)}
+      className="query-form | grid"
+      data-loading={isLoading}
+    >
+      <div className="query-form__content | p-3 overflow-hidden w-full lg:w-156.25">
+        <h1
+          className="font-heading"
+          id={queryHeadingId}
         >
-          {errors.query?.message}
-        </Message>
-      )}
-    </>
+          {INTRO_TITLE}
+        </h1>
+        <label
+          className="sr-only"
+          htmlFor={queryId}
+        >
+          {INTRO_TITLE}
+        </label>
+        <div className="flex flex-col gap-6">
+          <Controller
+            name="query"
+            control={control}
+            disabled={isLoading}
+            render={({ field }) => (
+              <input
+                type="text"
+                {...field}
+                placeholder={FORM_QUERY_PLACEHOLDER}
+                data-valid={errors?.query ? 'false' : 'true'}
+                value={field.value}
+                id={queryId}
+                aria-describedby={errors?.query ? queryErrorId : undefined}
+                aria-invalid={errors?.query ? 'true' : 'false'}
+                className={`font-body focusable w-full border-b-2 p-4 outline${errors?.query ? ' outline-red-500' : ''}`}
+              />
+            )}
+          />
+          {errors.query && (
+            <p
+              id={queryErrorId}
+              role="alert"
+              className="font-small border-2 border-red-500 bg-white p-3"
+            >
+              {errors.query?.message}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="query-form__button | cursor-pointer mx-auto"
+            icon="search"
+          >
+            {FORM_QUERY_BUTTON}
+          </Button>
+        </div>
+      </div>
+    </form>
   );
 }

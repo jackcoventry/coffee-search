@@ -1,3 +1,9 @@
 .result-tile {
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 64rem) {
+  .result-tile {
+    grid-template-columns: auto 1fr;
+  }
 }

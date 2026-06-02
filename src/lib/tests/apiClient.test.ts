@@ -69,14 +69,14 @@ describe('apiJson', () => {
     expect(result).toEqual({ a: 1, b: 'two' });
   });
 
-  it('falls back to statusText when json.error is missing/invalid', async () => {
+  it('falls back to "Request failed" when json.error is missing/invalid', async () => {
     (fetch as any).mockResolvedValueOnce(
       makeJsonResponse({ something: 'else' }, { status: 500, statusText: 'Server exploded' })
     );
 
     await expect(apiJson('/boom')).rejects.toMatchObject({
       status: 500,
-      message: 'Server exploded',
+      message: 'Request failed',
       details: { something: 'else' },
     } satisfies Partial<ApiError>);
   });
@@ -96,6 +96,16 @@ describe('apiJson', () => {
     (fetch as any).mockRejectedValueOnce(new DOMException('Timed out', 'TimeoutError'));
 
     await expect(apiJson('/slow')).rejects.toMatchObject({
+      status: 408,
+      message: 'Request timed out. Please try again.',
+      details: null,
+    } satisfies Partial<ApiError>);
+  });
+
+  it('turns plain aborted request errors into ApiError objects', async () => {
+    (fetch as any).mockRejectedValueOnce(new Error('Request was aborted.'));
+
+    await expect(apiJson('/aborted')).rejects.toMatchObject({
       status: 408,
       message: 'Request timed out. Please try again.',
       details: null,

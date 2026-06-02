@@ -7,9 +7,13 @@ export function createTimeoutError(message = REQUEST_TIMEOUT_MESSAGE) {
 }
 
 export function isAbortLikeError(err: unknown) {
+  const message = err instanceof Error ? err.message.toLowerCase() : '';
+
   return (
     (err instanceof DOMException || err instanceof Error) &&
-    (err.name === 'AbortError' || err.name === 'TimeoutError')
+    (err.name === 'AbortError' ||
+      err.name === 'TimeoutError' ||
+      message === 'request was aborted.')
   );
 }
 

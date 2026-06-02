@@ -1,11 +1,17 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchPanel } from '@/components/SearchPanel/SearchPanel';
 
 vi.mock('@/consts/label', () => ({
   BACK_TO_TOP: 'Back to top',
   INTRO_MARQUEE: 'Intro marquee',
   NEW_SEARCH: 'New search',
+  SEARCH_ERROR_TITLE: 'Search failed',
+  SEARCH_LOADING_PHRASES: [
+    'Fetching your coffee',
+    'Crunching those beans',
+    'Checking the roast notes',
+  ],
 }));
 
 const replaceMock = vi.fn();
@@ -112,6 +118,10 @@ describe('SearchPanel', () => {
     vi.stubGlobal('scrollTo', vi.fn());
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders QueryForm when there are no results', () => {
     render(<SearchPanel />);
 
@@ -133,6 +143,35 @@ describe('SearchPanel', () => {
 
     expect(screen.getByTestId('results')).toBeInTheDocument();
     expect(screen.queryByTestId('query-form')).toBeNull();
+  });
+
+  it('renders loading text under the coffee icon when loading', () => {
+    recommendState.isLoading = true;
+
+    render(<SearchPanel />);
+
+    expect(screen.getByText('Fetching your coffee')).toBeInTheDocument();
+  });
+
+  it('rotates loading text while loading', () => {
+    vi.useFakeTimers();
+    recommendState.isLoading = true;
+
+    render(<SearchPanel />);
+
+    expect(screen.getByText('Fetching your coffee')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1800);
+    });
+
+    expect(screen.getByText('Crunching those beans')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1800);
+    });
+
+    expect(screen.getByText('Checking the roast notes')).toBeInTheDocument();
   });
 
   it('calls submit from query param on mount when query exists and results are not showing', async () => {
@@ -171,6 +210,35 @@ describe('SearchPanel', () => {
     });
   });
 
+  it('does not auto-submit from query param while a search is loading', async () => {
+    mockQueryParam = 'coffee';
+    recommendState.isLoading = true;
+
+    render(<SearchPanel />);
+
+    await waitFor(() => {
+      expect(submitMock).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  it('does not retry the same URL query after it has already auto-submitted', async () => {
+    mockQueryParam = 'coffee';
+
+    const { rerender } = render(<SearchPanel />);
+
+    await waitFor(() => {
+      expect(submitMock).toHaveBeenCalledTimes(1);
+      expect(submitMock).toHaveBeenCalledWith({ query: 'coffee' });
+    });
+
+    recommendState.isLoading = true;
+    rerender(<SearchPanel />);
+    recommendState.isLoading = false;
+    rerender(<SearchPanel />);
+
+    expect(submitMock).toHaveBeenCalledTimes(1);
+  });
+
   it('handleSubmit updates the URL (encoded) and then calls submit', async () => {
     // Make submit async to ensure await path is realistic
     submitMock.mockResolvedValueOnce(undefined);
@@ -181,11 +249,28 @@ describe('SearchPanel', () => {
 
     await waitFor(() => {
       expect(replaceMock).toHaveBeenCalledWith('/search?query=hello%20world', { scroll: false });
-      expect(submitMock).toHaveBeenCalledWith({ query: '  hello world  ' });
+      expect(submitMock).toHaveBeenCalledWith({ query: 'hello world' });
     });
   });
 
-  it('clicking "New search" calls reset and router.replace(pathname)', () => {
+  it('does not auto-submit again when form submit updates the URL query', async () => {
+    submitMock.mockResolvedValueOnce(undefined);
+
+    const { rerender } = render(<SearchPanel />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'trigger-submit' }));
+
+    await waitFor(() => {
+      expect(submitMock).toHaveBeenCalledTimes(1);
+    });
+
+    mockQueryParam = 'hello world';
+    rerender(<SearchPanel />);
+
+    expect(submitMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('clicking "New search" calls reset, clears the URL and scrolls to the top', () => {
     recommendState.data = {
       query: 'tea',
       introduction: 'intro',
@@ -198,6 +283,27 @@ describe('SearchPanel', () => {
 
     expect(resetMock).toHaveBeenCalledTimes(1);
     expect(replaceMock).toHaveBeenCalledWith('/search', { scroll: false });
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+  });
+
+  it('does not re-submit the previous URL query while resetting to a new search', async () => {
+    mockQueryParam = 'tea';
+    recommendState.data = {
+      query: 'tea',
+      introduction: 'intro',
+      results: [{ id: 1 }],
+    };
+
+    const { rerender } = render(<SearchPanel />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'New search' }));
+    recommendState.data = null;
+
+    rerender(<SearchPanel />);
+
+    await waitFor(() => {
+      expect(submitMock).toHaveBeenCalledTimes(0);
+    });
   });
 
   it('renders Back to top link when results are showing', () => {
@@ -238,5 +344,18 @@ describe('SearchPanel', () => {
     render(<SearchPanel />);
 
     expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong');
+  });
+
+  it('does not render an error Message when results are showing', () => {
+    recommendState.error = 'Something went wrong';
+    recommendState.data = {
+      query: 'tea',
+      introduction: 'intro',
+      results: [{ id: 1 }],
+    };
+
+    render(<SearchPanel />);
+
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });

@@ -63,7 +63,7 @@ export async function apiJson<TResponse, TBody = unknown>(
 
   if (!res.ok) {
     const message =
-      (json && typeof json?.error === 'string' && json.error) || res.statusText || 'Request failed';
+      (json && typeof json?.error === 'string' && json.error) || 'Request failed';
 
     throw new ApiRequestError(message, res.status, json);
   }
