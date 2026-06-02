@@ -20,7 +20,10 @@ Create a `.env` or `.env.local` file in the project root with the variables belo
 - `DATABASE_URL` (string) — Postgres connection string for storing products and vectors.
 - `DATABASE_POOL_MAX` (number, optional) — maximum Postgres connections per app instance. Defaults to `3`.
 - `OPENAI_API_KEY` (string) — your OpenAI API key.
-- `OPENAI_TIMEOUT_MS` (number, optional) — timeout for OpenAI calls. Defaults to `12000`.
+- `OPENAI_TIMEOUT_MS` (number, optional) — fallback timeout for OpenAI calls.
+- `MODERATION_TIMEOUT_MS` (number, optional) — timeout for the moderation check. Defaults to `4000`.
+- `EMBED_TIMEOUT_MS` (number, optional) — timeout for the query embedding call. Defaults to `8000`.
+- `LLM_TIMEOUT_MS` (number, optional) — timeout for the final recommendation response. Defaults to `25000`.
 - `SITE_URL` (string, optional) — canonical site origin used for metadata, robots, and sitemap. Defaults to `https://coffee-search.vercel.app`.
 
 ## Installation

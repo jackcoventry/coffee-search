@@ -10,6 +10,7 @@ type ApiErrorContext = {
   durationMs?: number;
   method?: string;
   route?: string;
+  stages?: Record<string, number>;
 };
 
 function getStatus(err: unknown, fallbackStatus: number) {
@@ -39,6 +40,7 @@ export function apiErrorResponse(
     error: getErrorMessage(err),
     method: context.method,
     route: context.route,
+    stages: context.stages,
     status,
   };
 

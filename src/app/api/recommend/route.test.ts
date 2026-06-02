@@ -141,12 +141,15 @@ describe('/api/recommend', () => {
 
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: 'Request could not be processed.' });
-    expect(mocks.moderationCreate).toHaveBeenCalledWith({
-      input: 'recommend coffee for tomorrow',
-      model: 'omni-moderation-latest',
-    });
+    expect(mocks.moderationCreate).toHaveBeenCalledWith(
+      {
+        input: 'recommend coffee for tomorrow',
+        model: 'omni-moderation-latest',
+      },
+      { signal: expect.any(AbortSignal) }
+    );
     expect(mocks.rateLimitOrThrow).toHaveBeenCalledWith('recommend-blocked:unknown', 3, 60000);
-    expect(mocks.getCache).not.toHaveBeenCalled();
+    expect(mocks.getCache).toHaveBeenCalledWith('reco:recommend coffee for tomorrow');
     expect(mocks.embedText).not.toHaveBeenCalled();
     expect(mocks.openaiCreate).not.toHaveBeenCalled();
   });
