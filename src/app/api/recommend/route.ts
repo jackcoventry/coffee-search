@@ -22,6 +22,9 @@ import { withTimeout } from '@/lib/timeout';
 
 z.config({ jitless: true });
 
+const BLOCKED_PROMPT_LIMIT = 3;
+const BLOCKED_PROMPT_WINDOW_MS = 60_000;
+
 const Body = z.object({
   query: z.string().trim().min(2).max(150),
 });
@@ -45,6 +48,18 @@ export async function POST(req: Request) {
     const { query } = body.data;
     const g = guardUserInput(query); // Security gate for user queries!
     if (!g.ok) {
+      await rateLimitOrThrow(
+        `recommend-blocked:${ip}`,
+        BLOCKED_PROMPT_LIMIT,
+        BLOCKED_PROMPT_WINDOW_MS
+      );
+      console.warn('api_guard_blocked', {
+        durationMs: Date.now() - startedAt,
+        method: req.method,
+        reason: g.reason,
+        route: '/api/recommend',
+        status: 400,
+      });
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
     }
 
