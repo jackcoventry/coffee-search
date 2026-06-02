@@ -4,7 +4,6 @@ export type Recommendation = {
   origin: string[];
   description: string;
   reasons: string[];
-  tradeoff?: string;
 };
 
 export type RecommendResponse = {

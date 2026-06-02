@@ -11,9 +11,8 @@ Task:
 1) Extract the user's preferences from the query (flavours, brew method, acidity/body/sweetness, roast).
 2) Rank the best 3 coffees from the candidate list, into the property 'results'. Return the name, sku, origin and description fields as part of each result.
 3) For each pick, provide 2-3 bullet reasons mapped to specific fields, under the property "reasons" of the result.
-4) Provide one short tradeoff note for picks #2 and #3, under the property 'tradeoff' of the result.
-5) Use language in your response as if you're talking to the user directly.
-6) Return a summary response to the user's query in the 'introduction' property of the data. Introduce the results briefly always with a casual, fun comment on their query.
+4) Use language in your response as if you're talking to the user directly.
+5) Return a summary response to the user's query in the 'introduction' property of the data. Introduce the results briefly always with a casual, fun comment on their query.
 
 Rules:
 - ONLY choose from candidates (by SKU).
@@ -29,7 +28,6 @@ export const RecommendationSchema = z.object({
   origin: z.array(z.string()),
   description: z.string(),
   reasons: z.array(z.string()).min(1).max(3),
-  tradeoff: z.string().optional(),
 });
 
 export const RecommendResponseSchema = z.object({
