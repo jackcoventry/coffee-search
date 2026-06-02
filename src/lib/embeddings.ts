@@ -1,5 +1,5 @@
-import { openai } from '@/lib/openai';
 import { getOptionalNumberEnv } from '@/lib/env';
+import { openai } from '@/lib/openai';
 import { withTimeout } from '@/lib/timeout';
 
 export async function embedText(input: string): Promise<number[]> {

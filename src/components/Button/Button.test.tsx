@@ -140,34 +140,18 @@ describe('Button', () => {
     expect(container.querySelector('.button__icon')).not.toBeNull();
   });
 
-  it('iconOnly falls back aria-label to string children if aria-label is missing', () => {
+  it('iconOnly uses the required aria-label as its accessible name', () => {
     render(
       <Button
         icon="search"
         iconOnly
-      >
-        Search
-      </Button>
-    );
-
-    // role can still be "button", name should come from aria-label
-    const btn = screen.getByRole('button', { name: 'Search' });
-    expect(btn).toHaveAttribute('aria-label', 'Search');
-  });
-
-  it('iconOnly does not infer aria-label from non-string children', () => {
-    render(
-      <Button
-        icon="search"
-        iconOnly
+        aria-label="Search"
       >
         <span>Search</span>
       </Button>
     );
 
-    // No accessible name unless aria-label passed; query by role without name
-    const btn = screen.getByRole('button');
-    expect(btn.getAttribute('aria-label')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Search' })).toHaveAttribute('aria-label', 'Search');
   });
 
   it('applies size-related classes', () => {

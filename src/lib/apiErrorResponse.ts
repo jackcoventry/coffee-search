@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { isAbortLikeError, REQUEST_TIMEOUT_MESSAGE } from '@/lib/timeout';
+import { REQUEST_TIMEOUT_MESSAGE, isAbortLikeError } from '@/lib/timeout';
 
 type ApiErrorLike = {
   retryAfterSeconds?: unknown;
@@ -26,7 +26,11 @@ function getErrorMessage(err: unknown) {
   return err instanceof Error ? err.message : String(err);
 }
 
-export function apiErrorResponse(err: unknown, fallbackStatus = 500, context: ApiErrorContext = {}) {
+export function apiErrorResponse(
+  err: unknown,
+  fallbackStatus = 500,
+  context: ApiErrorContext = {}
+) {
   const isTimeout = isAbortLikeError(err);
   const status = isTimeout ? 504 : getStatus(err, fallbackStatus);
 

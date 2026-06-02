@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { GET } from './route';
 
 const mocks = vi.hoisted(() => ({
   getAllProducts: vi.fn(),
@@ -7,8 +8,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/getProducts', () => ({
   getAllProducts: mocks.getAllProducts,
 }));
-
-import { GET } from './route';
 
 function request(path = 'http://localhost/api/products') {
   return new Request(path, { method: 'GET' });

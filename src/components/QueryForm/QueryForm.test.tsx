@@ -139,6 +139,37 @@ describe('QueryForm', () => {
     expect(input).toHaveAccessibleDescription('Please enter a search term');
   });
 
+  it('generates unique field and error IDs for multiple forms', async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <>
+        <QueryForm
+          onSubmit={vi.fn()}
+          isLoading={false}
+        />
+        <QueryForm
+          onSubmit={vi.fn()}
+          isLoading={false}
+        />
+      </>
+    );
+
+    await user.click(screen.getAllByRole('button', { name: 'Search' })[0]);
+    await user.click(screen.getAllByRole('button', { name: 'Search' })[1]);
+
+    const inputs = container.querySelectorAll<HTMLInputElement>('input');
+    const inputIds = Array.from(inputs).map((input) => input.id);
+    const describedByIds = Array.from(inputs).map((input) =>
+      input.getAttribute('aria-describedby')
+    );
+    const allIds = Array.from(container.querySelectorAll<HTMLElement>('[id]')).map((el) => el.id);
+
+    expect(new Set(inputIds).size).toBe(inputIds.length);
+    expect(new Set(describedByIds).size).toBe(describedByIds.length);
+    expect(new Set(allIds).size).toBe(allIds.length);
+  });
+
   it('sets data-valid="true" on input when there is no error', async () => {
     const user = userEvent.setup();
 

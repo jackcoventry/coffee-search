@@ -20,7 +20,7 @@ describe('<Results />', () => {
   ] as any[];
 
   it('renders heading and introduction', () => {
-    render(
+    const { container } = render(
       <Results
         results={mockResults}
         introduction="We picked these for you"
@@ -35,6 +35,8 @@ describe('<Results />', () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText('We picked these for you')).toBeInTheDocument();
+
+    expect(container.querySelector('#results')).toHaveAttribute('tabindex', '-1');
   });
 
   it('renders the query details when query is provided', () => {

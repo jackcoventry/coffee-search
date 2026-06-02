@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { generateMetadata } from './page';
 
 const mocks = vi.hoisted(() => ({
   getProductBySku: vi.fn(),
@@ -9,8 +10,6 @@ vi.mock('@/lib/getProducts', () => ({
   getProductBySku: mocks.getProductBySku,
   getSimilarProductsBySku: mocks.getSimilarProductsBySku,
 }));
-
-import { generateMetadata } from './page';
 
 describe('/product/[sku] metadata', () => {
   beforeEach(() => {
@@ -44,7 +43,9 @@ describe('/product/[sku] metadata', () => {
   it('returns not-found metadata when the SKU is missing', async () => {
     mocks.getProductBySku.mockResolvedValue(null);
 
-    await expect(generateMetadata({ params: Promise.resolve({ sku: 'missing' }) })).resolves.toEqual({
+    await expect(
+      generateMetadata({ params: Promise.resolve({ sku: 'missing' }) })
+    ).resolves.toEqual({
       title: 'Product Not Found',
     });
   });

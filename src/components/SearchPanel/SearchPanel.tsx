@@ -39,7 +39,9 @@ export function SearchPanel() {
   };
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (!showResults) return;
+
+    document.getElementById('results')?.focus();
   }, [showResults]);
 
   return (

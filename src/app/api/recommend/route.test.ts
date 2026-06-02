@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { POST } from './route';
 
 const mocks = vi.hoisted(() => ({
   embedText: vi.fn(),
@@ -35,8 +36,6 @@ vi.mock('@/lib/openai', () => ({
 vi.mock('@/lib/rateLimit', () => ({
   rateLimitOrThrow: mocks.rateLimitOrThrow,
 }));
-
-import { POST } from './route';
 
 const candidates = [
   {
