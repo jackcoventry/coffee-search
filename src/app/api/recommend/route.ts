@@ -9,6 +9,7 @@ import { pool } from '@/lib/db';
 import { embedText } from '@/lib/embeddings';
 import { getOptionalNumberEnv } from '@/lib/env';
 import { guardUserInput } from '@/lib/guard';
+import { moderateUserInput } from '@/lib/moderation';
 import { openai } from '@/lib/openai';
 import { rateLimitOrThrow } from '@/lib/rateLimit';
 import {
@@ -57,6 +58,23 @@ export async function POST(req: Request) {
         durationMs: Date.now() - startedAt,
         method: req.method,
         reason: g.reason,
+        route: '/api/recommend',
+        status: 400,
+      });
+      return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
+    }
+
+    const moderation = await moderateUserInput(query);
+    if (moderation.flagged) {
+      await rateLimitOrThrow(
+        `recommend-blocked:${ip}`,
+        BLOCKED_PROMPT_LIMIT,
+        BLOCKED_PROMPT_WINDOW_MS
+      );
+      console.warn('api_guard_blocked', {
+        durationMs: Date.now() - startedAt,
+        method: req.method,
+        reason: 'moderation',
         route: '/api/recommend',
         status: 400,
       });

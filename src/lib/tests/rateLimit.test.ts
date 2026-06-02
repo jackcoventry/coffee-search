@@ -5,10 +5,15 @@ describe('rateLimitOrThrow', () => {
     vi.useFakeTimers();
     vi.setSystemTime(0);
     vi.resetModules();
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
   });
 
   it('allows the first call and creates a new bucket', async () => {
@@ -83,5 +88,60 @@ describe('rateLimitOrThrow', () => {
 
     await expect(rateLimitOrThrow('k2', 1, 1000)).resolves.toBeUndefined();
     await expect(rateLimitOrThrow('k1', 1, 1000)).rejects.toThrow();
+  });
+
+  it('uses Upstash Redis REST when configured', async () => {
+    process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example.com/';
+    process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ result: 1 }),
+      })
+    );
+
+    const { rateLimitOrThrow } = await import('@/lib/rateLimit');
+
+    await expect(rateLimitOrThrow('ip:1', 10, 60000)).resolves.toBeUndefined();
+
+    expect(fetch).toHaveBeenCalledWith('https://redis.example.com', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer redis-token',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(['INCR', 'ratelimit:ip:1']),
+    });
+    expect(fetch).toHaveBeenCalledWith('https://redis.example.com', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer redis-token',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(['PEXPIRE', 'ratelimit:ip:1', 60000]),
+    });
+  });
+
+  it('throws a rate limit error using Redis TTL when persistent count exceeds limit', async () => {
+    process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example.com';
+    process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ result: 3 }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ result: 42000 }),
+        })
+    );
+
+    const { RateLimitError, rateLimitOrThrow } = await import('@/lib/rateLimit');
+
+    await expect(rateLimitOrThrow('ip:1', 2, 60000)).rejects.toBeInstanceOf(RateLimitError);
   });
 });
