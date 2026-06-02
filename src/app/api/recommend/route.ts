@@ -33,7 +33,7 @@ const Body = z.object({
 export async function POST(req: Request) {
   const startedAt = Date.now();
   const stages: Record<string, number> = {};
-  const timed = async <T,>(stage: string, run: () => Promise<T>) => {
+  const timed = async <T>(stage: string, run: () => Promise<T>) => {
     const stageStartedAt = Date.now();
     try {
       return await run();
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
           WHERE embedding IS NOT NULL
             AND (is_active IS NULL OR is_active = true)
           ORDER BY distance ASC
-          LIMIT 5;
+          LIMIT 3;
       `,
         [embeddingSql]
       )
@@ -150,7 +150,7 @@ export async function POST(req: Request) {
         openai.responses.create(
           {
             max_output_tokens: 700,
-            model: process.env.LLM_MODEL || 'gpt-4.1-mini',
+            model: process.env.LLM_MODEL || 'gpt-4.1-nano',
             text: {
               format: { type: 'json_object' },
             },
