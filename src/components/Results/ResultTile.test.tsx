@@ -104,6 +104,34 @@ describe('ResultTile', () => {
     expect(wrapper!.className).toContain('bg-100001');
   });
 
+  it('shows a compact mobile image panel and equal-height desktop panels', () => {
+    const result = {
+      sku: 'SKU-LAYOUT',
+      name: 'Long Copy',
+      origin: ['Peru'],
+      reasons: ['A detailed reason', 'Another detailed reason'],
+    } as any;
+
+    const { container } = render(<ResultTile result={result} />);
+
+    const tile = container.querySelector('.result-tile') as HTMLElement;
+    const imagePanel = tile.querySelector('div') as HTMLElement;
+    const copyPanel = tile.querySelectorAll('div')[1] as HTMLElement;
+    const image = screen.getByRole('img', { name: 'Pack shot of the Long Copy product' });
+
+    expect(tile.className).toContain('result-tile');
+    expect(tile.className).toContain('items-stretch');
+    expect(tile.firstElementChild).toBe(imagePanel);
+    expect(tile.lastElementChild).toBe(copyPanel);
+    expect(imagePanel.className).toContain('flex');
+    expect(imagePanel.className).toContain('min-h-50');
+    expect(imagePanel.className).toContain('lg:min-h-75');
+    expect(imagePanel.className.split(/\s+/)).not.toContain('h-75');
+    expect(image.className).toContain('max-h-44');
+    expect(image.className).toContain('lg:max-h-full');
+    expect(copyPanel.className).toContain('lg:min-h-75');
+  });
+
   it('builds href with from="/" when query param is empty', () => {
     mockQueryParam = '';
     const result = {

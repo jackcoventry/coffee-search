@@ -5,7 +5,7 @@
 
 @theme {
   /* Colors mapped to SKU's  */
-  --color-100001: #f7b7c2;
+  --color-100001: #f6d0e4;
   --color-100002: #ffd8a8;
   --color-100003: #fff1a8;
   --color-100004: #c9f2c7;
@@ -15,6 +15,8 @@
   --color-100008: #e2c1f9;
   --color-100009: #f6c1ff;
   --color-100010: #e8d6c3;
+
+  --color-surface: #f7b7c2;
 
   --animate-fade-in: fadeIn 0.25s ease-in-out forwards;
   --animate-fade-out: fadeOut 0.25s ease-in-out forwards;

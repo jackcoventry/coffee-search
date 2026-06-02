@@ -66,7 +66,7 @@ export function SearchPanel() {
   return (
     <>
       {showResults ? null : (
-        <section className="overflow-hidden flex flex-col justify-center items-center motion-safe:transition-opacity bg-100001 p-3 mx-3 lg:mx-5 border-white min-h-(--shell-height)">
+        <section className="overflow-hidden flex flex-col justify-center items-center motion-safe:transition-opacity bg-surface p-3 mx-3 lg:mx-5 border-white min-h-(--shell-height)">
           <div className="flex flex-col gap-2 max-md:w-full">
             <svg
               className={`icon | mx-auto${isLoading ? ' motion-safe:animate-bounce' : ''}`}

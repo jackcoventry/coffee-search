@@ -22,17 +22,19 @@ export function ResultTile({ result }: Readonly<Props>) {
   const href = getProductHref(result.sku, from);
 
   return (
-    <div className="result-tile | lg:grid">
-      <div className={`${theme?.backgroundColor} w-75 h-75 hidden lg:block`}>
+    <div className="result-tile | grid items-stretch">
+      <div
+        className={`${theme?.backgroundColor} flex min-h-50 lg:w-75 lg:min-h-75 items-center justify-center p-5 lg:p-6`}
+      >
         <Image
           src="/pack.webp"
           alt={`Pack shot of the ${result.name} product`}
-          className="result-tile__image"
+          className="result-tile__image max-h-44 lg:max-h-full object-contain"
           width={300}
           height={300}
         />
       </div>
-      <div className="px-8 py-5 flex flex-col gap-2 bg-white">
+      <div className="px-8 py-5 lg:min-h-75 flex flex-col justify-center gap-2 bg-white">
         <h2 className="font-title">{result.name}</h2>
         <p className="font-body">
           {ORIGIN}: {result.origin.join(', ')}
