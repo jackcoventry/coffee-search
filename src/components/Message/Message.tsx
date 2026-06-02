@@ -5,16 +5,17 @@ import { Button } from '@/components/Button/Button';
 
 type Props = {
   id?: string;
+  title?: string;
   type?: MessageType;
 };
 
-export function Message({ children, id, type = 'error' }: PropsWithChildren<Props>) {
+export function Message({ children, id, title, type = 'error' }: PropsWithChildren<Props>) {
   const status = getMessageType(type);
   const [open, setOpen] = useState<boolean>(true);
 
   return open ? (
-    <p
-      className={`fixed flex items-center gap-3 z-20 bottom-5 right-5 p-4 ml-4 font-small border-2 max-w-2xl bg-white motion-safe:animate-bounce-in | ${status.borderColor}`}
+    <div
+      className={`fixed flex items-start gap-3 z-20 bottom-5 right-5 p-4 ml-4 font-small border-2 max-w-md bg-white shadow-[6px_6px_0_#000] motion-safe:animate-bounce-in | ${status.borderColor}`}
       id={id}
       role="alert"
       aria-live="assertive"
@@ -29,7 +30,10 @@ export function Message({ children, id, type = 'error' }: PropsWithChildren<Prop
       >
         <use xlinkHref={`/icons/icons.svg#${status.icon}`} />
       </svg>
-      {children}
+      <div className="flex-1">
+        {title ? <p className="font-bold uppercase">{title}</p> : null}
+        <p>{children}</p>
+      </div>
       <Button
         size="small"
         onClick={() => setOpen(false)}
@@ -39,6 +43,6 @@ export function Message({ children, id, type = 'error' }: PropsWithChildren<Prop
       >
         {CLOSE}
       </Button>
-    </p>
+    </div>
   ) : null;
 }

@@ -1,6 +1,13 @@
 'use client';
 
 import { USE_MOCK_RECOMMEND } from '@/consts/flags';
+import {
+  SEARCH_ERROR_BAD_REQUEST,
+  SEARCH_ERROR_DEFAULT,
+  SEARCH_ERROR_RATE_LIMIT,
+  SEARCH_ERROR_SERVER,
+  SEARCH_ERROR_TIMEOUT,
+} from '@/consts/label';
 import { useCallback, useState } from 'react';
 import type { RecommendResponse } from '@/types/recommend';
 import { apiJson } from '@/lib/apiClient';
@@ -17,17 +24,21 @@ function recommend(query: string) {
 }
 
 function getErrorMessage(error: unknown) {
-  if (error instanceof Error) return error.message;
-  if (
-    error &&
-    typeof error === 'object' &&
-    'message' in error &&
-    typeof error.message === 'string'
-  ) {
-    return error.message;
+  const status =
+    error && typeof error === 'object' && 'status' in error && typeof error.status === 'number'
+      ? error.status
+      : null;
+
+  if (status === 408 || status === 504) return SEARCH_ERROR_TIMEOUT;
+  if (status === 429) return SEARCH_ERROR_RATE_LIMIT;
+  if (status === 400 || status === 422) return SEARCH_ERROR_BAD_REQUEST;
+  if (status && status >= 500) return SEARCH_ERROR_SERVER;
+
+  if (error instanceof TypeError) {
+    return SEARCH_ERROR_SERVER;
   }
 
-  return 'Unknown error';
+  return SEARCH_ERROR_DEFAULT;
 }
 
 export function useRecommend() {
@@ -58,7 +69,6 @@ export function useRecommend() {
     } catch (e) {
       setError(getErrorMessage(e));
       setStatus('error');
-      throw e;
     }
   }, []);
 

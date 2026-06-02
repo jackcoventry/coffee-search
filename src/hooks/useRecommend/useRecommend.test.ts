@@ -114,7 +114,7 @@ describe('useRecommend', () => {
     expect(result.current.status).toBe('error');
     expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toBeNull();
-    expect(result.current.error).toBe('Boom');
+    expect(result.current.error).toBe('We could not get recommendations. Please try again.');
   });
 
   it('sets error state from API-like rejected objects', async () => {
@@ -138,7 +138,7 @@ describe('useRecommend', () => {
     });
 
     expect(result.current.status).toBe('error');
-    expect(result.current.error).toBe('Rate limited');
+    expect(result.current.error).toBe('Too many searches. Please wait a moment and try again.');
   });
 
   it('reset clears data, error and returns to idle', async () => {

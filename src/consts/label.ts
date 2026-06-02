@@ -1,4 +1,4 @@
-export const FOOTER_NOTE = 'Built with love. All rights reserved';
+export const FOOTER_NOTE = 'Built with coffee. Demo site only';
 export const FOOTER_LINK_LABEL = 'Source code';
 export const GITHUB_LINK_LABEL = 'View project on GitHub';
 export const SITE_LOGO = 'COFFEE {icon} SEARCH';
@@ -14,6 +14,14 @@ export const FORM_QUERY_PLACEHOLDER = 'in your own words...';
 export const FORM_QUERY_BUTTON = 'Find my coffee';
 export const FORM_QUERY_ERROR_MIN = 'Too short!';
 export const FORM_QUERY_ERROR_MAX = 'Too long!';
+export const SEARCH_ERROR_TITLE = 'Search failed';
+export const SEARCH_ERROR_DEFAULT = 'We could not get recommendations. Please try again.';
+export const SEARCH_ERROR_BAD_REQUEST =
+  'We could not read that search. Please edit it and try again.';
+export const SEARCH_ERROR_RATE_LIMIT = 'Too many searches. Please wait a moment and try again.';
+export const SEARCH_ERROR_SERVER =
+  'Coffee Search is having trouble getting recommendations. Please try again in a moment.';
+export const SEARCH_ERROR_TIMEOUT = 'The search took too long. Please try again.';
 export const BACK_TO_TOP = 'Back to top';
 export const NEW_SEARCH = 'New Search';
 export const BUY_NOW = 'Buy now';

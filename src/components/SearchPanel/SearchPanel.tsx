@@ -1,9 +1,9 @@
 'use client';
 
-import { BACK_TO_TOP, INTRO_MARQUEE, NEW_SEARCH } from '@/consts/label';
+import { BACK_TO_TOP, INTRO_MARQUEE, NEW_SEARCH, SEARCH_ERROR_TITLE } from '@/consts/label';
 import { useRecommend } from '@/hooks/useRecommend/useRecommend';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Button } from '@/components/Button/Button';
 import { Message } from '@/components/Message/Message';
 import { QueryForm } from '@/components/QueryForm/QueryForm';
@@ -15,27 +15,40 @@ export function SearchPanel() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { submit, data, error, reset, isLoading } = useRecommend();
+  const ignoreQuerySubmitRef = useRef(false);
+  const submittedQueryRef = useRef<string | null>(null);
   const queryFromUrl = useMemo(() => (searchParams.get('query') ?? '').trim(), [searchParams]);
   const results = data?.results ?? [];
   const showResults = !!data && results.length > 0;
 
   useEffect(() => {
-    if (!queryFromUrl) return;
+    if (!queryFromUrl) {
+      ignoreQuerySubmitRef.current = false;
+      submittedQueryRef.current = null;
+      return;
+    }
+    if (ignoreQuerySubmitRef.current) return;
+    if (submittedQueryRef.current === queryFromUrl) return;
+    if (isLoading) return;
     if (showResults) return;
 
+    submittedQueryRef.current = queryFromUrl;
     submit({ query: queryFromUrl });
-  }, [queryFromUrl, showResults, submit]);
+  }, [isLoading, queryFromUrl, showResults, submit]);
 
   const handleReset = () => {
+    ignoreQuerySubmitRef.current = true;
     reset();
     router.replace(pathname, { scroll: false });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async (payload: { query: string }) => {
     const q = payload.query.trim();
+    submittedQueryRef.current = q;
     router.replace(`${pathname}?query=${encodeURIComponent(q)}`, { scroll: false });
 
-    await submit(payload);
+    await submit({ query: q });
   };
 
   useEffect(() => {
@@ -97,7 +110,7 @@ export function SearchPanel() {
 
       <TextMarquee height={180}>{INTRO_MARQUEE}</TextMarquee>
 
-      {error ? <Message>{error}</Message> : null}
+      {error && !showResults ? <Message title={SEARCH_ERROR_TITLE}>{error}</Message> : null}
     </>
   );
 }
