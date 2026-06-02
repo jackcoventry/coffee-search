@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Scale } from '@/components/Scale/Scale';
 
@@ -19,6 +19,17 @@ describe('<Scale />', () => {
     // Inner fills
     const fills = container.querySelectorAll('.h-full.bg-black');
     expect(fills).toHaveLength(5);
+  });
+
+  it('exposes an accessible text equivalent', () => {
+    render(
+      <Scale
+        label="Body"
+        value={3.5}
+      />
+    );
+
+    expect(screen.getByRole('img', { name: 'Body: 3.5 out of 5' })).toBeInTheDocument();
   });
 
   it('fills none when value is 0', () => {

@@ -16,6 +16,20 @@ function recommend(query: string) {
   });
 }
 
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+
+  return 'Unknown error';
+}
+
 export function useRecommend() {
   const [status, setStatus] = useState<Status>('idle');
   const [data, setData] = useState<RecommendResponse | null>(null);
@@ -42,7 +56,7 @@ export function useRecommend() {
 
       return result;
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error');
+      setError(getErrorMessage(e));
       setStatus('error');
       throw e;
     }

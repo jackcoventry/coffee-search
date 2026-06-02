@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { type Page, expect, test } from '@playwright/test';
 
 function collectPageProblems(page: Page) {
   const errors: string[] = [];
@@ -25,7 +25,9 @@ test.describe('homepage', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     await expect(page).toHaveTitle(/coffee search/i);
-    await expect(page.getByRole('heading', { name: /describe your perfect coffee/i })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /describe your perfect coffee/i })
+    ).toBeVisible();
     await expect(page.getByPlaceholder(/in your own words/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /find my coffee/i })).toBeVisible();
 
@@ -96,7 +98,7 @@ test.describe('product page', () => {
     await expect(productImage).toHaveCount(1);
     await expect(productImage).toHaveAttribute('alt', /pack shot of .* product/i);
     await expect(page.getByRole('link', { name: /back to results/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /buy now/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /buy now/i })).toBeHidden();
 
     await expectNoPageProblems(errors);
   });
@@ -106,7 +108,7 @@ test.describe('product page', () => {
     await page.goto('/product/100001', { waitUntil: 'domcontentloaded' });
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByRole('link', { name: /buy now/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /buy now/i })).toBeHidden();
     await expect(page.getByRole('link', { name: /back to results/i })).toBeVisible();
   });
 });

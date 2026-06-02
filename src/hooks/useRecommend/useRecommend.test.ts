@@ -117,6 +117,30 @@ describe('useRecommend', () => {
     expect(result.current.error).toBe('Boom');
   });
 
+  it('sets error state from API-like rejected objects', async () => {
+    vi.doMock('@/consts/flags', () => ({ USE_MOCK_RECOMMEND: false }));
+
+    const apiJson = vi.fn().mockRejectedValue({ message: 'Rate limited', status: 429 });
+
+    vi.doMock('@/lib/apiClient', () => ({ apiJson }));
+    vi.doMock('@/mocks/openAiResponse2.json', () => ({ default: { results: [] } }));
+
+    const { useRecommend } = await import('@/hooks/useRecommend/useRecommend');
+
+    const { result } = renderHook(() => useRecommend());
+
+    await act(async () => {
+      try {
+        await result.current.submit({ query: 'latte' });
+      } catch {
+        // swallow error so React state updates
+      }
+    });
+
+    expect(result.current.status).toBe('error');
+    expect(result.current.error).toBe('Rate limited');
+  });
+
   it('reset clears data, error and returns to idle', async () => {
     vi.doMock('@/consts/flags', () => ({ USE_MOCK_RECOMMEND: false }));
 

@@ -1,5 +1,5 @@
 # Standard "CI-ish" gate
-npm run ci:local
+npm run verify
 npm run bundle:budget
 
 # Conditional Lighthouse (only when it matters)

@@ -10,6 +10,10 @@ const QuerySchema = z.object({
   offset: z.coerce.number().min(0).default(0),
 });
 
+function getOptionalSearchParam(searchParams: URLSearchParams, name: string) {
+  return searchParams.get(name) ?? undefined;
+}
+
 export async function GET(req: Request) {
   const startedAt = Date.now();
 
@@ -17,8 +21,8 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
 
     const parsed = QuerySchema.safeParse({
-      limit: searchParams.get('limit'),
-      offset: searchParams.get('offset'),
+      limit: getOptionalSearchParam(searchParams, 'limit'),
+      offset: getOptionalSearchParam(searchParams, 'offset'),
     });
     if (!parsed.success) {
       return NextResponse.json({ error: 'Request could not be processed.' }, { status: 400 });
@@ -32,7 +36,6 @@ export async function GET(req: Request) {
       offset: parsed.data.offset,
       products,
     });
-
   } catch (err) {
     return apiErrorResponse(err, 500, {
       durationMs: Date.now() - startedAt,

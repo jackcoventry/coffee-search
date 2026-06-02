@@ -5,7 +5,7 @@ export default function robots() {
     rules: [
       {
         userAgent: '*',
-        disallow: '/', // This is intentional to hide from search engines; this is only an example site
+        allow: '*',
       },
     ],
     sitemap: getAbsoluteUrl('/sitemap.xml'),
