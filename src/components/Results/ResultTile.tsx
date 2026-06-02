@@ -1,9 +1,9 @@
 import { ORIGIN, VIEW_PRODUCT } from '@/consts/label';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { getProductHref, getResultsReturnPath } from '@/lib/productLinks';
 import { getTheme } from '@/utils/getTheme';
 import { Recommendation } from '@/types/recommend';
+import { getProductHref, getResultsReturnPath } from '@/lib/productLinks';
 import { Button } from '@/components/Button/Button';
 import './ResultTile.css';
 

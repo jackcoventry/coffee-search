@@ -1,7 +1,7 @@
+import { USE_MOCK_PRODUCTS } from '@/consts/flags';
 import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 import { Product } from '@/types/product';
-import { USE_MOCK_PRODUCTS } from '@/consts/flags';
 import { pool } from '@/lib/db';
 import { mockProducts } from '@/mocks/products';
 

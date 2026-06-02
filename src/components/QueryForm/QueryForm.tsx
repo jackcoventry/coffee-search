@@ -8,6 +8,7 @@ import {
   INTRO_TITLE,
 } from '@/consts/label';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useId } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import z from 'zod';
 import { Button } from '@/components/Button/Button';
@@ -31,6 +32,7 @@ type QueryFormProps = {
 };
 
 export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
+  const formId = useId();
   const {
     control,
     handleSubmit,
@@ -47,7 +49,9 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
     if (isLoading) return;
     onSubmit(data);
   };
-  const queryErrorId = 'query-error';
+  const queryId = `${formId}-query`;
+  const queryErrorId = `${formId}-query-error`;
+  const queryHeadingId = `${formId}-query-heading`;
 
   return (
     <>
@@ -59,13 +63,13 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
         <div className="query-form__content | p-3 overflow-hidden w-full lg:w-156.25">
           <h1
             className="font-heading"
-            id="query-heading"
+            id={queryHeadingId}
           >
             {INTRO_TITLE}
           </h1>
           <label
             className="sr-only"
-            htmlFor="query"
+            htmlFor={queryId}
           >
             {INTRO_TITLE}
           </label>
@@ -81,7 +85,7 @@ export function QueryForm({ onSubmit, isLoading }: Readonly<QueryFormProps>) {
                   placeholder={FORM_QUERY_PLACEHOLDER}
                   data-valid={errors?.query ? 'false' : 'true'}
                   value={field.value}
-                  id="query"
+                  id={queryId}
                   aria-describedby={errors?.query ? queryErrorId : undefined}
                   aria-invalid={errors?.query ? 'true' : 'false'}
                   className={`font-body focusable w-full border-b-2 p-4 outline${errors?.query ? ' outline-red-500' : ''}`}

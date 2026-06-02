@@ -16,7 +16,11 @@ export class RateLimitError extends Error {
   }
 }
 
-export async function rateLimitOrThrow(key: string, limit: number, windowMs: number): Promise<void> {
+export async function rateLimitOrThrow(
+  key: string,
+  limit: number,
+  windowMs: number
+): Promise<void> {
   const now = Date.now();
   const existing = buckets.get(key);
 

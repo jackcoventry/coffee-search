@@ -12,10 +12,10 @@ import { guardUserInput } from '@/lib/guard';
 import { openai } from '@/lib/openai';
 import { rateLimitOrThrow } from '@/lib/rateLimit';
 import {
+  RECOMMENDATION_SYSTEM_PROMPT,
+  RecommendResponseSchema,
   canonicalizeRecommendationResponse,
   createNoCandidateResponse,
-  RecommendResponseSchema,
-  RECOMMENDATION_SYSTEM_PROMPT,
 } from '@/lib/recommendation';
 import { safeJson } from '@/lib/safeJson';
 import { withTimeout } from '@/lib/timeout';

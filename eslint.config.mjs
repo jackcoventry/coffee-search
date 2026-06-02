@@ -13,9 +13,14 @@ const eslintConfig = defineConfig([
     'build/**',
     'coverage/**',
     'next-env.d.ts',
-    '**/*.test.tsx',
-    '**/*.test.ts',
   ]),
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      '@next/next/no-img-element': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 ]);
 
 export default eslintConfig;

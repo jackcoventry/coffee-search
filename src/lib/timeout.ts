@@ -8,9 +8,9 @@ export function createTimeoutError(message = REQUEST_TIMEOUT_MESSAGE) {
 
 export function isAbortLikeError(err: unknown) {
   return (
-    err instanceof DOMException ||
-    err instanceof Error
-  ) && (err.name === 'AbortError' || err.name === 'TimeoutError');
+    (err instanceof DOMException || err instanceof Error) &&
+    (err.name === 'AbortError' || err.name === 'TimeoutError')
+  );
 }
 
 export function timeoutSignal(timeoutMs: number, signal?: AbortSignal) {

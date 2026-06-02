@@ -8,12 +8,22 @@ type CommonProps = {
   className?: string;
   children: React.ReactNode;
   icon?: IconName;
-  iconOnly?: boolean;
   iconPosition?: 'left' | 'right';
   size?: 'default' | 'large' | 'small';
   variant?: 'primary' | 'secondary';
-  'aria-label'?: string;
 };
+
+type AccessibleNameProps =
+  | {
+      iconOnly: true;
+      'aria-label': string;
+    }
+  | {
+      iconOnly?: false;
+      'aria-label'?: string;
+    };
+
+type BaseProps = CommonProps & AccessibleNameProps;
 
 type PropsToOmit = 'children' | 'className' | 'aria-label';
 
@@ -36,14 +46,14 @@ type LinkOnlyProps = {
   disabled?: never;
 } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, PropsToOmit | 'href' | 'onClick'>;
 
-type Props = CommonProps & (ButtonOnlyProps | LinkOnlyProps);
+type Props = BaseProps & (ButtonOnlyProps | LinkOnlyProps);
 
 type ButtonComponent = {
   (
-    props: Readonly<CommonProps & ButtonOnlyProps> & { ref?: React.Ref<HTMLButtonElement> }
+    props: Readonly<BaseProps & ButtonOnlyProps> & { ref?: React.Ref<HTMLButtonElement> }
   ): JSX.Element;
   (
-    props: Readonly<CommonProps & LinkOnlyProps> & { ref?: React.Ref<HTMLAnchorElement> }
+    props: Readonly<BaseProps & LinkOnlyProps> & { ref?: React.Ref<HTMLAnchorElement> }
   ): JSX.Element;
 };
 

@@ -17,6 +17,7 @@ export function Message({ children, id, type = 'error' }: PropsWithChildren<Prop
       className={`fixed flex items-center gap-3 z-20 bottom-5 right-5 p-4 ml-4 font-small border-2 max-w-2xl bg-white motion-safe:animate-bounce-in | ${status.borderColor}`}
       id={id}
       role="alert"
+      aria-live="assertive"
       aria-atomic="true"
     >
       <svg
@@ -34,6 +35,7 @@ export function Message({ children, id, type = 'error' }: PropsWithChildren<Prop
         onClick={() => setOpen(false)}
         icon="close"
         iconOnly
+        aria-label={CLOSE}
       >
         {CLOSE}
       </Button>

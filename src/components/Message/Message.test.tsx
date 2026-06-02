@@ -38,6 +38,7 @@ describe('Message', () => {
 
     const alert = screen.getByRole('alert');
     expect(alert).toBeInTheDocument();
+    expect(alert).toHaveAttribute('aria-live', 'assertive');
     expect(alert).toHaveAttribute('aria-atomic', 'true');
     expect(alert).toHaveAttribute('id', 'message-id');
     expect(alert).toHaveTextContent('Error occurred');

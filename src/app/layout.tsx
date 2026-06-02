@@ -1,9 +1,9 @@
 import { META_DESCRIPTION, META_TITLE, SKIP_LABEL } from '@/consts/label';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/site';
 import { Footer } from '@/components/Footer/Footer';
 import { Header } from '@/components/Header/Header';
-import { SITE_URL } from '@/lib/site';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {

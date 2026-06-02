@@ -14,7 +14,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --passWithNoTests",
-    "prettier": "prettier -w",
+    "prettier": "prettier --write \"src/**/*.{css,tsx,ts}\"",
     "analyse": "next experimental-analyze",
     "lighthouse:local": "node src/scripts/lighthouse.local.mjs",
     "lighthouse:run": "node src/scripts/lighthouse.run.mjs",
@@ -39,15 +39,20 @@
     "uuid": "^11.1.1"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@vercel/analytics": "^1.6.1",
+    "clsx": "^2.1.1",
     "csv-parse": "^6.1.0",
     "next": "^16.2.6",
+    "openai": "^6.18.0",
+    "pg": "^8.18.0",
     "pgvector": "^0.2.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@hookform/resolvers": "^5.2.2",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
@@ -61,7 +66,6 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.0.18",
-    "clsx": "^2.1.1",
     "dotenv": "^17.2.4",
     "eslint": "^9",
     "eslint-config-next": "^16.2.6",
@@ -69,14 +73,11 @@
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "lint-staged": "^16.2.7",
-    "openai": "^6.18.0",
-    "pg": "^8.18.0",
-    "react-hook-form": "^7.71.1",
+    "prettier": "^3.8.3",
     "svg-sprite": "^2.0.4",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "vitest": "^4.0.18",
-    "zod": "^4.3.6"
+    "vitest": "^4.0.18"
   }
 }

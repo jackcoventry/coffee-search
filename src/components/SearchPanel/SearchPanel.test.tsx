@@ -63,7 +63,15 @@ vi.mock('@/components/QueryForm/QueryForm', () => ({
 }));
 
 vi.mock('@/components/Results/Results', () => ({
-  Results: ({ children }: any) => <div data-testid="results">{children}</div>,
+  Results: ({ children }: any) => (
+    <section
+      id="results"
+      data-testid="results"
+      tabIndex={-1}
+    >
+      {children}
+    </section>
+  ),
 }));
 
 vi.mock('@/components/TextMarquee/TextMarquee', () => ({
@@ -205,10 +213,10 @@ describe('SearchPanel', () => {
     expect(link).toHaveAttribute('href', '#content');
   });
 
-  it('calls window.scrollTo(0,0) when showResults changes', () => {
+  it('focuses the results region when results are shown', async () => {
     // initial render: no results
     const { rerender } = render(<SearchPanel />);
-    expect((globalThis as any).scrollTo).toHaveBeenCalledTimes(1);
+    expect((globalThis as any).scrollTo).not.toHaveBeenCalled();
 
     recommendState.data = {
       query: 'tea',
@@ -217,7 +225,11 @@ describe('SearchPanel', () => {
     };
 
     rerender(<SearchPanel />);
-    expect((globalThis as any).scrollTo).toHaveBeenCalledWith(0, 0);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('results')).toHaveFocus();
+    });
+    expect((globalThis as any).scrollTo).not.toHaveBeenCalled();
   });
 
   it('renders an error Message when error exists', () => {

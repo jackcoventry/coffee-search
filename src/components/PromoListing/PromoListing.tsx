@@ -2,8 +2,8 @@
 
 import { PROMOS_TITLE } from '@/consts/label';
 import { useSearchParams } from 'next/navigation';
-import { getProductHref } from '@/lib/productLinks';
 import { Product } from '@/types/product';
+import { getProductHref } from '@/lib/productLinks';
 import { PromoTile } from '@/components/PromoListing/PromoTile';
 
 type Props = {
